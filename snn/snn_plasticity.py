@@ -74,7 +74,7 @@ class Oja:
             lr      -   Learning rate
         '''
 
-        self.rule_id = 0
+        self.rule_id = 1
         self.lr = lr
 
     def dwdt(self, t, w, kwargs):
@@ -85,7 +85,7 @@ class Oja:
 
         x = kwargs['pre'][:,13]
         y = kwargs['post'][:,14]
-
+        
         return kwargs['synapses'][:,6] * (x * y - (y ** 2) * kwargs['synapses'][:,3])
 
     @property

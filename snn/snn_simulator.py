@@ -227,6 +227,7 @@ class Simulator:
                         s_x = np.isin(self.network.synapses[synapses,1], spike_indx)
                         s_y = np.isin(self.network.synapses[synapses,2], spike_indx)
                         dwdt = self.solver(self.network.synapses[synapses,3], t, self.dt, plasticity.Rules[rule].dwdt, pre = pre, post = post, synapses = self.network.synapses[synapses], s_x = s_x, s_y = s_y)
+                        
                         dwdt[np.where(np.isnan(dwdt))] = 0.0
                         self.network.synapses[synapses,3] += self.dt * dwdt
 
