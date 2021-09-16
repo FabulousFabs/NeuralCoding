@@ -84,8 +84,8 @@ class Oja:
             w'(t) = lr * (x * y - y**2 * w)
         '''
 
-        x = kwargs['pre'][:,13] * kwargs['s_x']
-        y = kwargs['post'][:,14] * kwargs['s_y']
+        x = kwargs['pre'][:,13]
+        y = kwargs['post'][:,14]
 
         return kwargs['synapses'][:,6] * (x * y - (y ** 2) * kwargs['synapses'][:,3])
 # register Oja
