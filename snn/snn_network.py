@@ -138,13 +138,14 @@ class Network:
 
     def reset(self):
         '''
-        Reset membrane potential, incoming currents, pre- and post synaptic traces.
+        Reset membrane potential, incoming currents, pre-, post-synaptic traces and adaptation currents.
         '''
 
-        self.network.neurons[:,11] = self.network.neurons[:,1]
-        self.network.neurons[:,12] = 0
-        self.network.neurons[:,13] = 1e-6
-        self.network.neurons[:,14] = 1e-6
+        self.neurons[:,11] = self.neurons[:,1]
+        self.neurons[:,12] = 0
+        self.neurons[:,13] = 1e-6
+        self.neurons[:,14] = 1e-6
+        self.neurons[:,15] = 0
 
     def save(self, to = None):
         '''
