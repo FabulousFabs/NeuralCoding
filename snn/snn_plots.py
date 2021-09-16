@@ -12,6 +12,7 @@ def raster(monitor = None, simulator = None):
     dt = simulator.dt
     states = simulator.monitors[monitor].state.T
 
+    plt.figure()
     plt.matshow(states, cmap = 'gray', fignum = 1)
 
     axes = plt.gca()

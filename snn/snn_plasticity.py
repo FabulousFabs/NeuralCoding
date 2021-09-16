@@ -9,20 +9,22 @@ class STDP:
     Spike-time-dependent plasticity rule
     '''
 
-    def __init__(self, lr = 1e-6, tau_pos = 10, tau_neg = 10):
+    def __init__(self, lr = 1e-6, w_max = 1, n_p = 1, n_n = 1):
         '''
         Constructor
 
         INPUTS:
             lr      -   Learning rate
-            tau_pos -   Positive tau (ms)
-            tau_neg -   Negative tau (ms)
+            w_max   -   Maximum positive weight
+            n_p     -   Positive weight scaling
+            n_n     -   Negative weight scaling
         '''
 
         self.rule_id = 0
         self.lr = lr
-        self.tau_pos = tau_pos
-        self.tau_neg = tau_neg
+        self.w_max = w_max
+        self.n_p = n_p
+        self.n_n = n_n
 
     def dwdt(self, t, w, kwargs):
         '''
@@ -30,30 +32,31 @@ class STDP:
             w'(t) = lr * (A_p(w) * x(t) * s_x - A_n(w) * y(t) * s_y)
         '''
 
-        return kwargs['synapses'][:,6] * (self.A_p(kwargs['synapses'][:,3]) * kwargs['pre'][:,13] * kwargs['s_x'] - self.A_n(kwargs['synapses'][:,3]) * kwargs['post'][:,14] * kwargs['s_y'])
+        return kwargs['synapses'][:,6] * (self.A_p(kwargs['synapses']) * kwargs['pre'][:,13] * kwargs['s_x'] - self.A_n(kwargs['synapses']) * kwargs['post'][:,14] * kwargs['s_y'])
 
-    def A_p(self, w, w_max = 10, n_p = 1):
+    def A_p(self, s):
         '''
         Soft bound weight dependence
 
         INPUTS:
-            w       -   Weights
-            w_max   -   Maximum weight
-            n_p     -   Scaling
+            s   -   Synapses
         '''
 
-        return (w_max - w) * n_p
+        return (s[:,7] - s[:,3]) * s[:,8]
 
-    def A_n(self, w, n_n = 1):
+    def A_n(self, s):
         '''
         Soft bound weight dependence
 
         INPUTS:
-            w   - Weights
-            n_n - Scaling
+            s   -   Synapses
         '''
 
-        return (w * n_n)
+        return (s[:,3] * s[:,9])
+
+    @property
+    def free_params(self):
+        return np.array([self.w_max, self.n_p, self.n_n, 0.0])
 # register STDP
 Rules[0] = STDP()
 
@@ -63,20 +66,16 @@ class Oja:
     Oja rule
     '''
 
-    def __init__(self, lr = 1e-6, tau_pos = 10, tau_neg = 10):
+    def __init__(self, lr = 1e-6):
         '''
         Constructor
 
         INPUTS:
             lr      -   Learning rate
-            tau_pos -   Positive tau (ms)
-            tau_neg -   Negative tau (ms)
         '''
 
         self.rule_id = 0
         self.lr = lr
-        self.tau_pos = tau_pos
-        self.tau_neg = tau_neg
 
     def dwdt(self, t, w, kwargs):
         '''
@@ -88,5 +87,9 @@ class Oja:
         y = kwargs['post'][:,14]
 
         return kwargs['synapses'][:,6] * (x * y - (y ** 2) * kwargs['synapses'][:,3])
+
+    @property
+    def free_params(self):
+        return np.zeros((4,))
 # register Oja
 Rules[1] = Oja()

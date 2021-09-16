@@ -123,13 +123,9 @@ class Network:
         if plasticity is not None:
             new[:,5] = plasticity.rule_id
             new[:,6] = plasticity.lr
-            new[:,7] = plasticity.tau_pos
-            new[:,8] = plasticity.tau_neg
+            new[:,7:11] = plasticity.free_params
         else:
             new[:,5] = np.nan
-            new[:,6] = 0
-            new[:,7] = 0
-            new[:,8] = 0
 
         self.synapses = np.vstack((self.synapses, new)) if self.synapses.shape[0] > 0 else np.array(new)
         self.fibres = np.vstack((self.fibres, np.array([fibre]))) if self.fibres.shape[0] > 0 else np.array([fibre])

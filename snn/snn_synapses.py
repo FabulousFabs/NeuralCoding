@@ -36,7 +36,7 @@ class Full:
         outs = np.array([])
 
         for pre_syn in pre:
-            pre_syn_post = np.ones((post.shape[0], 9))
+            pre_syn_post = np.ones((post.shape[0], 11))
             pre_syn_post[:,1] = pre_syn
             pre_syn_post[:,2] = post
             pre_syn_post[:,3] = self.efficacy
@@ -87,7 +87,7 @@ class kWTA:
         for i in np.arange(0, pre.shape[0]):
             c_pre = pre[i]
             c_post = np.delete(post, i)
-            pre_syn_post = np.ones((post.shape[0]-1, 9))
+            pre_syn_post = np.ones((post.shape[0]-1, 11))
             pre_syn_post[:,1] = c_pre
             pre_syn_post[:,2] = c_post
             pre_syn_post[:,3] = self.efficacy
@@ -135,7 +135,7 @@ class One_To_One:
 
         assert(pre.shape == post.shape)
 
-        outs = np.ones((pre.shape[0], 9))
+        outs = np.ones((pre.shape[0], 11))
         outs[:,1] = pre
         outs[:,2] = post
         outs[:,3] = self.efficacy
@@ -181,10 +181,10 @@ class Percent_To_One:
         if pre is None or post is None: return False
 
         p = np.round(pre.shape[0] * self.p).astype(np.int)
-        outs = np.empty((0, 9), dtype=np.float)
+        outs = np.empty((0, 11), dtype=np.float)
 
         for i in np.arange(post.shape[0]):
-            i_syn = np.ones((p, 9))
+            i_syn = np.ones((p, 11))
             i_syn[:,1] = np.random.choice(pre, size=p, replace=False)
             i_syn[:,2] = post[i]
             i_syn[:,3] = self.efficacy
