@@ -1,5 +1,7 @@
 import numpy as np
 
+from .snn_units import *
+
 class Prototype:
     '''
     Neuron prototype super class
@@ -30,14 +32,17 @@ class Prototype:
             x'(t) = 1/tau_pos * (-x + a_p(x) * s)
         '''
 
-        return (1 / kwargs['neurons'][:,3]) * (-kwargs['neurons'][:,13] + self.a_p(kwargs['neurons'][:,13] * kwargs['spike_indx']))
+        s = np.zeros((kwargs['neurons'].shape[0],))
+        s[kwargs['spike_indx']] = 1
+
+        return (1 / kwargs['neurons'][:,3]) * (-kwargs['neurons'][:,13] + self.a_p(kwargs['neurons'][:,13]) * s)
 
     def a_p(self, x):
         '''
         a_p modifier for pos presynaptic traces
         '''
-
-        return np.where(x > 0, 1, 0)
+        
+        return 1 - x
 
     def dydt(self, t, Y, kwargs):
         '''
@@ -69,17 +74,37 @@ class GLIF(Prototype):
         Standard parameters (see GLIF4 in paper)
         '''
 
-        self.R = 177.0      # MO
-        self.tau = 19.0     # ms
-        self.C = 107.0      # pF
-        self.E_l = -75.5    # mV
-        self.th_i = -47.2   # mV
-        self.d_th_i = 27.8  # mV
-        self.del_t = 6.55   # ms
-        self.g = 40.0       # nS
-        self.E_syn = 0.0    # mV
-        self.V = self.E_l   # mV
-        self.I = 0.0        # pA
+        '''
+        self.R = 201.0*O            # MO
+        self.tau = 19.0             # ms
+        self.C = 107.0*pF           # pF
+        self.E_l = -75.5            # mV
+        self.th_i = -47.2           # mV
+        self.d_th_i = 27.8          # mV
+        self.del_t = 6.55           # ms
+        self.g = 40.0*nS            # nS
+        self.E_syn = 0.0            # mV
+        self.V = self.E_l           # mV
+        self.I = 0.0                # pA
+        self.trace_pre = 1e-6
+        self.trace_post = 1e-6
+        self.a = 0.00103
+        self.b = 1/0.00225
+        self.tau_k = self.tau
+        self.w = 0.0
+        '''
+
+        self.R = 215318172
+        self.tau = 13.9
+        self.C = 1.59e-10
+        self.E_l = -0.07758969
+        self.th_i = 0.03011692
+        self.d_th_i = 0.03062544
+        self.del_t = 4.43
+        self.g = -40.0 * nS
+        self.E_syn = 0.0
+        self.V = self.E_l
+        self.I = 0.0
         self.trace_pre = 1e-6
         self.trace_post = 1e-6
         self.a = 0.00103
@@ -95,7 +120,7 @@ class GLIF(Prototype):
             V'(t) = 1 / C * (I_e(t) - 1/R * [V(t) - E_L])
         '''
 
-        return (1 / kwargs['neurons'][:,4]) * (kwargs['neurons'][:,12] - (1 / kwargs['neurons'][:,2]) * (V - kwargs['neurons'][:,1]))
+        return (1 / kwargs['neurons'][:,4]) * (kwargs['neurons'][:,12] * pA - (1 / kwargs['neurons'][:,2]) * (V - kwargs['neurons'][:,1]))
 
     def V_apply(self, neurons, dt, dVdt):
         '''
@@ -126,7 +151,7 @@ class GLIF(Prototype):
         Return parameters
         '''
 
-        return np.array([-1, self.E_l, self.R, self.tau, self.C, self.E_l, self.th_i, self.d_th_i, self.del_t, self.g, self.E_syn, self.V, self.I, self.trace_pre, self.trace_post, 0.0], dtype=np.float)
+        return np.array([-1, self.E_l, self.R, self.tau, self.C, self.E_l, self.th_i, self.d_th_i, self.del_t, self.g, self.E_syn, self.V, self.I, self.trace_pre, self.trace_post, 0.0, self.w, self.a, self.b, self.tau_k], dtype=np.float)
 
 class LIF(Prototype):
     '''

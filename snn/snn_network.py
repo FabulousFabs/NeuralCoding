@@ -74,6 +74,15 @@ class Network:
             idx     -   Synapse ids
         '''
 
+        if type(fibre) == np.ndarray:
+            synapses = np.array([])
+
+            for f in fibre:
+                n = np.where(self.synapses[:,0] == f)[0]
+                synapses = np.hstack((synapses, n)) if synapses.shape[0] > 0 else np.array(n)
+
+            return synapses.reshape((synapses.shape[0], 1))
+
         return np.where(self.synapses[:,0] == fibre)[0]
 
 

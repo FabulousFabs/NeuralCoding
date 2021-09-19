@@ -29,7 +29,7 @@ class Simulator:
         self.monitors = []
         self.plasticity = plasticity
 
-    def monitor(self, monitor_type = None, structures = None, of = None):
+    def monitor(self, monitor_type = None, structures = None, of = None, is_synapse = False):
         '''
         Add a monitor
 
@@ -37,17 +37,23 @@ class Simulator:
             monitor_type    -   Monitor type as per snn.monitors
             structures      -   Structures to be monitored (None = all)
             of              -   If continuous monitor, what target?
+            is_synapse      -   Are we monitoring a synapse?
         '''
 
         if self.network.ready_state is False: return False
+        if is_synapse is True and of is None: return False
 
-        if structures is None: structures = self.network.structs
-        neurons = self.network.neurons_in(structures)
+        if is_synapse is False:
+            if structures is None: structures = self.network.structs
+            targets = self.network.neurons_in(structures)
+        else:
+            if structures is None: structures = self.network.fibres
+            targets = self.network.synapses_in(structures)
 
         if of is None:
-            self.monitors.append(monitor_type(neurons = neurons))
+            self.monitors.append(monitor_type(targets = targets))
         else:
-            self.monitors.append(monitor_type(neurons = neurons, of = of))
+            self.monitors.append(monitor_type(targets = targets, of = of, is_synapse = is_synapse))
 
         return len(self.monitors)-1
 
@@ -136,20 +142,25 @@ class Simulator:
             self.network.neurons[:,16] = self.network.neurons[:,16] + (self.dt * dwdt)
 
 
+            # update pre-syn traces
+            dxdt = self.solver(self.network.neurons[:,13], t, self.dt, proto.dxdt, neurons = self.network.neurons, spike_indx = spike_indx)
+            self.network.neurons[:,13] = self.network.neurons[:,13] + (self.dt * dxdt)
+
+
             # update post-syn traces
             dydt = self.solver(self.network.neurons[:,14], t, self.dt, proto.dydt, neurons = self.network.neurons, spike_indx = spike_indx)
             self.network.neurons[:,14] = self.network.neurons[:,14] + (self.dt * dydt)
 
 
             # push to monitors
-            [m.state_change(self.network.neurons, spike_indx) for m in self.monitors]
+            [m.state_change(self.network.neurons, spike_indx, self.network.synapses) for m in self.monitors]
 
 
             # reset currents
             self.network.neurons[:,12] = np.zeros((self.network.neurons.shape[0],))
 
 
-            # propagate spikes and learn
+            # propagate spikes
             for pre in spike_indx:
                 if self.network.synapses.shape[0] < 1:
                     break
@@ -161,7 +172,7 @@ class Simulator:
                     continue
 
                 # check outputs are within T
-                if np.any(self.network.synapses[conns,4].astype(np.int)+t > self.network.transmission.shape[1]-1):
+                if np.any(self.network.synapses[conns,4].astype(np.int)+int(t/self.dt) > self.network.transmission.shape[1]-1):
                     continue
 
                 # get post and transmit
@@ -171,6 +182,7 @@ class Simulator:
                 self.network.transmission[post,self.network.synapses[conns,4].astype(np.int)+int(t/self.dt)] += self.network.synapses[conns,3] * (np.ones((conns.shape[0],)) * proto.It(outs))
 
 
+            '''
             # update pre-syn traces
             received_spike = np.zeros((self.network.neurons.shape[0],))
 
@@ -190,6 +202,7 @@ class Simulator:
             self.network.neurons[:,13] = self.network.neurons[:,13] + (self.dt * dxdt)
 
 
+
             # update pre-syn traces for inputs
             if inputs is not None:
                 for input in inputs:
@@ -199,8 +212,9 @@ class Simulator:
                     L = self.network.transmission.shape[1]
                     pattern = np.pad(ins, ((0,0), (0, L - ins.shape[1])), 'constant', constant_values = 0)
 
-                    dxdt = self.solver(self.network.neurons[:,13], t, self.dt, proto.dxdt, neurons = self.network.neurons[neurons,:], spike_indx = pattern[:,t])
+                    dxdt = self.solver(self.network.neurons[neurons,13], t, self.dt, proto.dxdt, neurons = self.network.neurons[neurons,:], spike_indx = pattern[:,int(t/self.dt)])
                     self.network.neurons[neurons,13] = self.network.neurons[neurons,13] + (self.dt * dxdt)
+            '''
 
 
             # update lateral inhibition (feedback)
@@ -227,7 +241,6 @@ class Simulator:
                         s_x = np.isin(self.network.synapses[synapses,1], spike_indx)
                         s_y = np.isin(self.network.synapses[synapses,2], spike_indx)
                         dwdt = self.solver(self.network.synapses[synapses,3], t, self.dt, plasticity.Rules[rule].dwdt, pre = pre, post = post, synapses = self.network.synapses[synapses], s_x = s_x, s_y = s_y)
-                        
                         dwdt[np.where(np.isnan(dwdt))] = 0.0
                         self.network.synapses[synapses,3] += self.dt * dwdt
 

@@ -16,28 +16,29 @@ class Spikes(Prototype):
     Spike monitor
     '''
 
-    def __init__(self, neurons = None):
+    def __init__(self, targets = None):
         '''
         Constructor
 
         INPUTS:
-            neurons     -   Population to monitor
+            targets     -   Population to monitor
         '''
 
         super().__init__()
 
-        if neurons is None:
+        if targets is None:
             self.neurons = False
         else:
-            self.neurons = neurons
+            self.neurons = targets
 
-    def state_change(self, state, events):
+    def state_change(self, state, events, state2):
         '''
         Step function
 
         INPUTS:
             state   -   States of object to be observed
             events  -   Events of object to be observed
+            state2  -   Synapse states of object
         '''
 
         if self.neurons is False:
@@ -53,34 +54,40 @@ class States(Prototype):
     State monitor
     '''
 
-    def __init__(self, neurons = None, of = Voltage):
+    def __init__(self, targets = None, of = Voltage, is_synapse = False):
         '''
         Constructor
 
         INPUTS:
-            neurons     -   Population to be monitored
+            targets     -   Population to be monitored
             of          -   Variable to monitor
+            is_synapse  -   Are we monitoring a synapse?
         '''
 
         super().__init__()
 
-        if neurons is None:
-            self.neurons = False
+        if targets is None:
+            self.targets = False
         else:
-            self.neurons = neurons
+            self.targets = targets
 
         self.of = of
+        self.is_synapse = is_synapse
 
-    def state_change(self, state, events):
+    def state_change(self, state, events, state2):
         '''
         Step function
 
         INPUTS:
             state   -   States of object to be observed
             events  -   Events of object to be observed
+            state2  -   Synapse states of object
         '''
 
-        if self.neurons is False:
+        if self.targets is False:
             return False
 
-        self.state = np.hstack((self.state, np.array(state[self.neurons,self.of]))) if self.state.shape[0] > 0 else np.array(state[self.neurons,self.of])
+        if self.is_synapse is False:
+            self.state = np.hstack((self.state, np.array(state[self.targets,self.of]))) if self.state.shape[0] > 0 else np.array(state[self.targets,self.of])
+        else:
+            self.state = np.hstack((self.state, np.array(state2[self.targets,self.of]))) if self.state.shape[0] > 0 else np.array(state2[self.targets,self.of])

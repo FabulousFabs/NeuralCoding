@@ -1,5 +1,6 @@
 import numpy as np
 
+from . import snn_units as units
 from . import snn_generators as generators
 from . import snn_neurons as neurons
 from . import snn_synapses as synapses
