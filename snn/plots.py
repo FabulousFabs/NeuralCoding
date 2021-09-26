@@ -78,6 +78,12 @@ def continuous(monitor = None, simulator = None):
     axes.set_yticklabels(np.arange(0, states.shape[0]))
 
 def rate_in_time(monitor = None, simulator = None, L = 1, grid = False):
+    '''
+    Show grid plot of firing rates of neurons across time.
+
+    @TODO: Implement firing rate utility functions.
+    '''
+
     dt = simulator.dt
     states = simulator.monitors[monitor].state.T
     states = np.pad(states, ((0,0), (0, L-(states.shape[1] % L))), 'constant', constant_values = 0)

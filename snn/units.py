@@ -1,3 +1,7 @@
+'''
+Universal unit declarations
+'''
+
 import numpy as np
 
 second = 1e3

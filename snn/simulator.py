@@ -1,23 +1,27 @@
 import numpy as np
-from .snn_solvers import *
-from .snn_monitors import *
-from . import snn_plasticity as plasticity
+
+from .solvers import *
+from .monitors import *
+from . import plasticity
+from . import neurons as Neurons
+from .neurons_labels import *
 
 class Simulator:
     '''
     Simulator class
     '''
 
-    def __init__(self, dt = 0.001, network = None, solver = RungeKutta,
+    def __init__(self, dt = 1e-3, network = None, solver = RungeKutta,
                        verbose = False, plasticity = True):
         '''
         Constructor
 
         INPUTS:
-            dt      -   Time step size
-            network -   Network class to simulate
-            solver  -   Solver function to use for diffeqs
-            verbose -   Logging state (true/false)
+            dt          - Time step size
+            network     - Network class to simulate
+            solver      - Solver function to use for diffeqs
+            verbose     - Logging state (True/False)
+            plasticity  - Allow plasticity in this simulator? (True/False)
         '''
 
         if network is None: return False
@@ -87,7 +91,7 @@ class Simulator:
 
 
         # setup prototypes and transmission
-        proto = self.network.neuron_prototype()
+        proto = Neurons.Prototype()
         self.network.transmission = np.zeros((self.network.neurons.shape[0], np.ceil(T / self.dt).astype(np.int)))
 
 
@@ -102,7 +106,7 @@ class Simulator:
 
                 L = self.network.transmission.shape[1]
                 pattern = np.pad(ins, ((0,0), (0, L - ins.shape[1])), 'constant', constant_values = 0)
-                self.network.transmission[neurons] += self.network.neurons[neurons,6].reshape((neurons.shape[0], 1)) * pattern
+                self.network.transmission[neurons] += (self.network.neurons[neurons,PARAM_UNI.V_thr.value] - self.network.neurons[neurons,PARAM_UNI.V.value]).reshape((neurons.shape[0], 1)) * pattern
 
 
         # main integration loop
@@ -118,38 +122,53 @@ class Simulator:
             # update lateral inhibition (feedforward)
             for struct in self.network.structs:
                 neurons = self.network.neurons_in(struct)
-                avg = np.mean(self.network.neurons[neurons,13])
-                self.network.transmission[neurons,int(t/self.dt)] += (self.network.neurons[neurons,15] / 2) * (-avg)
+                avg = np.mean(self.network.neurons[neurons,PARAM_UNI.A.value])
+                self.network.transmission[neurons,int(t/self.dt)] += self.network.neurons[neurons,PARAM_UNI.inhib_ff.value] * (-avg)
 
 
             # setup current
-            self.network.neurons[:,12] = self.network.transmission[:,int(t/self.dt)]
+            self.network.neurons[:,PARAM_UNI.I.value] = self.network.transmission[:,int(t/self.dt)]
 
 
-            # integrate membrane potential
-            dVdt = self.solver(self.network.neurons[:,11], t, self.dt, proto.dVdt, neurons = self.network.neurons)
-            self.network.neurons[:,11] = proto.V_apply(self.network.neurons, self.dt, dVdt)
+            # integrate membrane potential per neuron type
+            for n_t in Neurons.Neurons:
+                n_i_t = np.where(np.round(self.network.neurons[:,PARAM_UNI.type.value]) == Neurons.Neurons[n_t].type)[0]
+
+                # check for neurons of this type
+                if n_i_t.shape[0] < 1:
+                    continue
+
+                dVdt = self.solver(self.network.neurons[:,PARAM_UNI.V.value], t, self.dt, Neurons.Neurons[n_t].dVdt, neurons = self.network.neurons[n_i_t,:])
+                self.network.neurons[n_i_t,PARAM_UNI.V.value] = Neurons.Neurons[n_t].V_apply(self.network.neurons[n_i_t,:], self.dt, dVdt)
 
 
             # detect spikes (in spite of floating point issues)
-            spike_def = self.network.neurons[:,11] > (self.network.neurons[:,6] + self.network.neurons[:,16])
-            spike_may = np.isclose(self.network.neurons[:,11], (self.network.neurons[:,6] + self.network.neurons[:,16]), rtol=1e-3, atol=1e-3)
+            spike_def = self.network.neurons[:,PARAM_UNI.V.value] > (self.network.neurons[:,PARAM_UNI.V_thr.value] + self.network.neurons[:,PARAM_UNI.w.value])
+            spike_may = np.isclose(self.network.neurons[:,PARAM_UNI.V.value], (self.network.neurons[:,PARAM_UNI.V_thr.value] + self.network.neurons[:,PARAM_UNI.w.value]), rtol=1e-3, atol=1e-3)
             spike_indx = np.where(spike_def | spike_may)[0]
 
 
-            # update adaptation of neurons
-            dwdt = self.solver(self.network.neurons[:,16], t, self.dt, proto.dwdt, neurons = self.network.neurons, spike_indx = spike_indx)
-            self.network.neurons[:,16] = self.network.neurons[:,16] + (self.dt * dwdt)
+            # update adapatation by neuron type
+            for n_t in Neurons.Neurons:
+                n_i_t = np.where(np.round(self.network.neurons[:,PARAM_UNI.type.value]) == Neurons.Neurons[n_t].type)[0]
+
+                # check for neurons of this type
+                if n_i_t.shape[0] < 1:
+                    continue
+
+                s = np.isin(n_i_t, spike_indx)
+                dwdt = self.solver(self.network.neurons[:,PARAM_UNI.w.value], t, self.dt, Neurons.Neurons[n_t].dwdt, neurons = self.network.neurons[n_i_t,:], spike_indx = s)
+                self.network.neurons[n_i_t,PARAM_UNI.w.value] = self.network.neurons[n_i_t,PARAM_UNI.w.value] + (self.dt * dwdt)
 
 
             # update pre-syn traces
-            dxdt = self.solver(self.network.neurons[:,13], t, self.dt, proto.dxdt, neurons = self.network.neurons, spike_indx = spike_indx)
-            self.network.neurons[:,13] = self.network.neurons[:,13] + (self.dt * dxdt)
+            dxdt = self.solver(self.network.neurons[:,PARAM_UNI.x.value], t, self.dt, proto.dxdt, neurons = self.network.neurons, spike_indx = spike_indx)
+            self.network.neurons[:,PARAM_UNI.x.value] = self.network.neurons[:,PARAM_UNI.x.value] + (self.dt * dxdt)
 
 
             # update post-syn traces
-            dydt = self.solver(self.network.neurons[:,14], t, self.dt, proto.dydt, neurons = self.network.neurons, spike_indx = spike_indx)
-            self.network.neurons[:,14] = self.network.neurons[:,14] + (self.dt * dydt)
+            dydt = self.solver(self.network.neurons[:,PARAM_UNI.y.value], t, self.dt, proto.dydt, neurons = self.network.neurons, spike_indx = spike_indx)
+            self.network.neurons[:,PARAM_UNI.y.value] = self.network.neurons[:,PARAM_UNI.y.value] + (self.dt * dydt)
 
 
             # push to monitors
@@ -157,72 +176,46 @@ class Simulator:
 
 
             # reset currents
-            self.network.neurons[:,12] = np.zeros((self.network.neurons.shape[0],))
+            self.network.neurons[:,PARAM_UNI.I.value] = np.zeros((self.network.neurons.shape[0],))
 
 
             # propagate spikes
-            for pre in spike_indx:
-                if self.network.synapses.shape[0] < 1:
-                    break
+            for n_t in Neurons.Neurons:
+                n_i_t = np.where(np.round(self.network.neurons[:,PARAM_UNI.type.value]) == Neurons.Neurons[n_t].type)[0]
 
-                conns = np.where(self.network.synapses[:,1] == pre)[0].astype(np.int)
-
-                # check it has outputs
-                if conns.shape[0] < 1:
+                # check for neurons of this type
+                if n_i_t.shape[0] < 1:
                     continue
 
-                # check outputs are within T
-                if np.any(self.network.synapses[conns,4].astype(np.int)+int(t/self.dt) > self.network.transmission.shape[1]-1):
-                    continue
+                s = n_i_t[np.isin(n_i_t, spike_indx)]
 
-                # get post and transmit
-                post = self.network.synapses[conns,2].astype(np.int)
-                outs = self.network.neurons[pre,:].reshape((1, proto.params.shape[0]))
-                outs = np.tile(outs, (conns.shape[0], 1))
-                self.network.transmission[post,self.network.synapses[conns,4].astype(np.int)+int(t/self.dt)] += self.network.synapses[conns,3] * (np.ones((conns.shape[0],)) * proto.It(outs))
+                for pre in s:
+                    if self.network.synapses.shape[0] < 1:
+                        break
 
+                    conns = np.where(self.network.synapses[:,1] == pre)[0].astype(np.int)
 
-            '''
-            # update pre-syn traces
-            received_spike = np.zeros((self.network.neurons.shape[0],))
+                    # check it has outputs
+                    if conns.shape[0] < 1:
+                        continue
 
-            for pre in spike_indx:
-                if self.network.synapses.shape[0] < 1:
-                    break
+                    # check outputs are within T
+                    if np.any(self.network.synapses[conns,4].astype(np.int)+int(t/self.dt) > self.network.transmission.shape[1]-1):
+                        continue
 
-                conns = np.where(self.network.synapses[:,1] == pre)[0].astype(np.int)
-
-                # check it has outputs
-                if conns.shape[0] < 1:
-                    continue
-
-                received_spike[self.network.synapses[conns,2].astype(np.int)] = 1
-
-            dxdt = self.solver(self.network.neurons[:,13], t, self.dt, proto.dxdt, neurons = self.network.neurons, spike_indx = received_spike)
-            self.network.neurons[:,13] = self.network.neurons[:,13] + (self.dt * dxdt)
-
-
-
-            # update pre-syn traces for inputs
-            if inputs is not None:
-                for input in inputs:
-                    neurons = self.network.neurons_in(input['into'])
-                    ins = np.array(input['inject'], dtype=np.int)
-
-                    L = self.network.transmission.shape[1]
-                    pattern = np.pad(ins, ((0,0), (0, L - ins.shape[1])), 'constant', constant_values = 0)
-
-                    dxdt = self.solver(self.network.neurons[neurons,13], t, self.dt, proto.dxdt, neurons = self.network.neurons[neurons,:], spike_indx = pattern[:,int(t/self.dt)])
-                    self.network.neurons[neurons,13] = self.network.neurons[neurons,13] + (self.dt * dxdt)
-            '''
+                    # get post and transmit
+                    post = self.network.synapses[conns,2].astype(np.int)
+                    outs = self.network.neurons[pre,:].reshape((1, Neurons.FLAG_PARAMS_SIZE))
+                    outs = np.tile(outs, (conns.shape[0], 1))
+                    self.network.transmission[post,self.network.synapses[conns,4].astype(np.int)+int(t/self.dt)] += self.network.synapses[conns,3] * (np.ones((conns.shape[0],)) * Neurons.Neurons[n_t].It(outs))
 
 
             # update lateral inhibition (feedback)
             for struct in self.network.structs:
                 if t < T-self.dt:
                     neurons = self.network.neurons_in(struct)
-                    avg = np.mean(self.network.neurons[neurons,14])
-                    self.network.transmission[neurons,int(t/self.dt)+1] += (self.network.neurons[neurons,15] / 2) * (-avg)
+                    avg = np.mean(self.network.neurons[neurons,PARAM_UNI.y.value])
+                    self.network.transmission[neurons,int(t/self.dt)+1] += self.network.neurons[neurons,PARAM_UNI.inhib_fb.value] * (-avg)
 
 
             # plasticity rules
@@ -246,9 +239,9 @@ class Simulator:
 
 
             # reset potentials
-            self.network.neurons[spike_indx,11] = self.network.neurons[spike_indx,1]
+            self.network.neurons[spike_indx,PARAM_UNI.V.value] = self.network.neurons[spike_indx,PARAM_UNI.E_l.value]
 
 
             # check for diverging values
-            div = np.where(self.network.neurons[:,11] <= (-3 * np.abs(self.network.neurons[:,6])))[0].astype(np.int)
-            self.network.neurons[div,11] = self.network.neurons[div,1]
+            div = np.where(self.network.neurons[:,PARAM_UNI.V.value] <= (-3 * np.abs(self.network.neurons[:,PARAM_UNI.V_thr.value])))[0].astype(np.int)
+            self.network.neurons[div,PARAM_UNI.V.value] = self.network.neurons[div,1]

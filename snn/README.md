@@ -1,7 +1,7 @@
 # SNN Framework
 @TODO:
-- Refactor neuron classes (one prototype with free parameters for subs and named handles of parameters)
-- Allow multiple neuron types within network
+- DONE: Refactor neuron classes (one prototype with free parameters for subs and named handles of parameters)
+- DONE: Allow multiple neuron types within network
 - Import neuron types from Allen Institute specimen database
 - Investigate BCM plasticity in current implementation
 - Investigate Oja plasticity in current implementation

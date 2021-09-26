@@ -1,7 +1,6 @@
 import numpy as np
 
-Voltage = 11
-Ampere = 12
+from .neurons_labels import *
 
 class Prototype:
     '''
@@ -54,7 +53,7 @@ class States(Prototype):
     State monitor
     '''
 
-    def __init__(self, targets = None, of = Voltage, is_synapse = False):
+    def __init__(self, targets = None, of = PARAM_UNI.V, is_synapse = False):
         '''
         Constructor
 

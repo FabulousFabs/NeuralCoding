@@ -1,3 +1,13 @@
+'''
+Unit test for Spike-Time-Dependent Plasticity rule.
+
+Creates two neurons, with A firing at B. The timing of pre- (i) and post- (j)
+synaptic spikes is manipulated to yield dwdt(t^f_i - t^f_j). This should show
+the classic trajectory of learning where pre before post facilitates a synapses
+whereas the other way around depresses it, with values reaching their extremes
+where for minimal spike time differences.
+'''
+
 import numpy as np
 import sys
 sys.path.append('./../..')

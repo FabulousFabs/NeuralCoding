@@ -1,3 +1,10 @@
+'''
+Unit test for Oja rule.
+
+Creates two neurons, with A firing at B. The timing of pre- (i) and post- (j)
+synaptic spikes is manipulated to yield dwdt(t^f_i - t^f_j).
+'''
+
 import numpy as np
 import sys
 sys.path.append('./../..')

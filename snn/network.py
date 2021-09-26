@@ -1,13 +1,15 @@
 import numpy as np
-from .snn_neurons import *
-from .snn_synapses import *
+
+from .neurons import *
+from .synapses import *
+from .neurons_labels import *
 
 class Network:
     '''
     Network class
     '''
 
-    def __init__(self, neuron_prototype = GLIF, build_from = None):
+    def __init__(self, neuron_prototype = LIF, build_from = None):
         '''
         Constructor
 
@@ -56,12 +58,12 @@ class Network:
             neurons = np.array([])
 
             for struct in structure:
-                n = np.where(self.neurons[:,0] == struct)[0]
+                n = np.where(self.neurons[:,PARAM_UNI.struct.value] == struct)[0]
                 neurons = np.hstack((neurons, n)) if neurons.shape[0] > 0 else np.array(n)
 
             return neurons.reshape((neurons.shape[0], 1))
 
-        return np.where(self.neurons[:,0] == structure)[0]
+        return np.where(self.neurons[:,PARAM_UNI.struct.value] == structure)[0]
 
     def synapses_in(self, fibre):
         '''
@@ -86,22 +88,28 @@ class Network:
         return np.where(self.synapses[:,0] == fibre)[0]
 
 
-    def structure(self, n = 1, lateral_inhibition = 0.0, **kwargs):
+    def structure(self, n = 1, t = LIF, inhib_ff = 0.0, inhib_fb = 0.0, **kwargs):
         '''
         Add new structure
 
         INPUTS:
             n                   - Number of neurons to create
-            lateral_inhibition  - Degree of lateral inhibition (0 to disable)
+            t                   - Neuron type to use for this structure
+            inhib_ff            - Degree of lateral feedforward inhibition (0 to disable)
+            inhib_fb            - Degree of lateral feedback inhibition (0 to disable)
+            **kwargs            - Arguments to pass to neuron constructor (opts)
 
         OUTPUTS:
             struct  -   Structure id
         '''
 
-        new = self.neuron_prototype(opts = kwargs).params
+        tt = t(opts = kwargs)
+        new = tt.params()
         struct = self.structs.shape[0]
-        new[0] = struct
-        new[15] = lateral_inhibition
+        new[0,PARAM_UNI.struct.value] = struct
+        new[0,PARAM_UNI.type.value] = tt.type
+        new[0,PARAM_UNI.inhib_ff.value] = inhib_ff
+        new[0,PARAM_UNI.inhib_fb.value] = inhib_fb
         new = np.tile(new, (n, 1))
         self.neurons = np.vstack((self.neurons, new)) if self.neurons.shape[0] > 0 else np.array(new)
         self.structs = np.vstack((self.structs, struct)) if self.structs.shape[0] > 0 else np.array([struct])
@@ -113,9 +121,10 @@ class Network:
         Add new fibre
 
         INPUTS:
-            pre     - Presynaptic layer
-            post    - Postsynaptic layer
-            type    - Connection type
+            pre         - Presynaptic layer
+            post        - Postsynaptic layer
+            type        - Connection type
+            plasticity  - Plasticity rule to use on this fibre
 
         OUTPUTS:
             fibre   - Fibre id
@@ -146,11 +155,11 @@ class Network:
         Reset membrane potential, incoming currents, pre-, post-synaptic traces and adaptation currents.
         '''
 
-        self.neurons[:,11] = self.neurons[:,1]
-        self.neurons[:,12] = 0
-        self.neurons[:,13] = 1e-6
-        self.neurons[:,14] = 1e-6
-        self.neurons[:,15] = 0
+        self.neurons[:,PARAM_UNI.V.value] = self.neurons[:,PARAM_UNI.E_l.value]
+        self.neurons[:,PARAM_UNI.I.value] = 0
+        self.neurons[:,PARAM_UNI.x.value] = 1e-6
+        self.neurons[:,PARAM_UNI.y.value] = 1e-6
+        self.neurons[:,PARAM_UNI.w.value] = 0
 
     def save(self, to = None):
         '''

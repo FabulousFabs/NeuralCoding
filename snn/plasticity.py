@@ -1,5 +1,7 @@
 import numpy as np
 
+from .neurons_labels import *
+
 # register of all rules
 Rules = {}
 
@@ -32,8 +34,8 @@ class STDP:
             w'(t) = lr * (A_p(w) * x(t) * s_x - A_n(w) * y(t) * s_y)
         '''
 
-        x = kwargs['pre'][:,14]
-        y = kwargs['post'][:,14]
+        x = kwargs['pre'][:,PARAM_UNI.y.value]
+        y = kwargs['post'][:,PARAM_UNI.y.value]
         xy = x - y
 
         A_p = np.where(xy > 0)[0]
@@ -96,8 +98,8 @@ class Oja:
             w'(t) = lr * (x * y - beta * y**2 * w)
         '''
 
-        x = kwargs['pre'][:,14]
-        y = kwargs['post'][:,14]
+        x = kwargs['pre'][:,PARAM_UNI.y.value]
+        y = kwargs['post'][:,PARAM_UNI.y.value]
 
         return kwargs['synapses'][:,6] * (x * y - kwargs['synapses'][:,7] * (y ** 2) * kwargs['synapses'][:,3])
 
@@ -134,8 +136,8 @@ class BCM:
             w'(t) = lr * (y * (y - theta(y)) * x - e * w)
         '''
 
-        x = kwargs['pre'][:,14]
-        y = kwargs['post'][:,14]
+        x = kwargs['pre'][:,PARAM_UNI.y.value]
+        y = kwargs['post'][:,PARAM_UNI.y.value]
 
         return kwargs['synapses'][:,6] * (y * (y - self.theta(y, kwargs['synapses'])) * x - kwargs['synapses'][:,7] * kwargs['synapses'][:,3])
 
