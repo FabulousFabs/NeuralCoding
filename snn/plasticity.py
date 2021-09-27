@@ -42,10 +42,10 @@ class STDP:
         A_n = np.where(xy < 0)[0]
 
         dwdt = np.zeros((kwargs['pre'].shape[0],))
-        dwdt[A_p] = self.A_p(kwargs['synapses'][A_p,:]) * xy[A_p] * kwargs['s_x']
-        dwdt[A_n] = self.A_n(kwargs['synapses'][A_n,:]) * xy[A_n] * kwargs['s_y']
+        dwdt[A_p] = self.A_p(kwargs['synapses'][A_p,:]) * xy[A_p] * kwargs['s_x'][A_p]
+        dwdt[A_n] = self.A_n(kwargs['synapses'][A_n,:]) * xy[A_n] * kwargs['s_y'][A_n]
 
-        return dwdt
+        return kwargs['synapses'][:,6] * dwdt
 
     def A_p(self, s):
         '''
