@@ -23,6 +23,7 @@ class Prototype:
         self.I = 0.0            # incoming current
         self.tau_pos = 10.0     # positive spike trace tau constant
         self.tau_neg = 10.0     # negative spike trace tau constant
+        self.xp = 1e-6          # presynaptic spike trace (of arrivals)
         self.x = 1e-6           # presynaptic spike trace
         self.y = 1e-6           # postsynaptic spike trace
         self.a = 0.0            # adaptation constant alpha
@@ -32,6 +33,11 @@ class Prototype:
         self.A = 1.0            # output current
         self.inhib_ff = 0.0     # lateral inhibition (feedforward)
         self.inhib_fb = 0.0     # lateral inhibition (feedback)
+        self.ff0 = 0.1          # feedforward inhibition zero
+        self.ff_mva = 0.0       # feedforward max vs average
+        self.fb_tau = 1.4       # feedback inhibition time constant
+        self.ff = 0.0           # incoming feedforward inhibition
+        self.fb = 0.0           # incoming feedback inhibition
 
         self.__params = np.zeros((1, FLAG_PARAMS_SIZE))
         self.free_params = None
@@ -91,6 +97,25 @@ class Prototype:
 
         return np.where(x > 0, 1, 0)
 
+    def dffdt(self, t, ff, kwargs):
+        '''
+        Feedforward inhibition updates as per
+            ff'(t) = inhib_ff * (xh - ff0) * xm
+        '''
+
+        xh = np.mean(kwargs['neurons'][:,PARAM_UNI.I.value]) + kwargs['neurons'][:,PARAM_UNI.ff_mva.value] * (np.max(kwargs['neurons'][:,PARAM_UNI.I.value]) - np.mean(kwargs['neurons'][:,PARAM_UNI.I.value]))
+        xm = np.where(kwargs['neurons'][:,PARAM_UNI.ff0.value] < xh, 1, 0)
+
+        return kwargs['neurons'][:,PARAM_UNI.inhib_ff.value] * (xh - kwargs['neurons'][:,PARAM_UNI.ff0.value]) * xm
+
+    def dfbdt(self, t, fb, kwargs):
+        '''
+        Feedback inhibition updates as per
+            fb'(t) = inhib_fb * (1 / fb_tau * (yh - fb))
+        '''
+
+        return kwargs['neurons'][:,PARAM_UNI.inhib_fb.value] * ((1 / kwargs['neurons'][:,PARAM_UNI.fb_tau.value]) * (np.mean(kwargs['neurons'][:,PARAM_UNI.y.value]) - fb))
+
     def params(self):
         '''
         Get parameters of current neuron model
@@ -139,13 +164,13 @@ class LIF(Prototype):
     def dVdt(self, t, V, kwargs):
         '''
         Compute dVdt as per
-            V'(t) = V * m + (I + N)
+            V'(t) = V * m + (I_e - I_ff - I_fb + N)
         '''
 
         noise = self.rng.normal(scale = self.N, size = (kwargs['neurons'][:,PARAM_LIF.N.value].shape[0],))
         noise_mask = np.where(kwargs['neurons'][:,PARAM_LIF.N.value] != 0, 1, 0).astype(np.int)
 
-        return V * kwargs['neurons'][:,PARAM_LIF.m.value] + (kwargs['neurons'][:,PARAM_UNI.I.value] + (noise_mask * noise))
+        return V * kwargs['neurons'][:,PARAM_LIF.m.value] + (kwargs['neurons'][:,PARAM_UNI.I.value] - kwargs['neurons'][:,PARAM_UNI.ff.value] - kwargs['neurons'][:,PARAM_UNI.fb.value] + (noise_mask * noise))
 
     def V_apply(self, neurons, dt, dVdt):
         '''

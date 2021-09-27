@@ -2,12 +2,18 @@ import numpy as np
 import numpy.matlib
 import matplotlib.pyplot as plt
 
-def raster(monitor = None, simulator = None):
+def raster(monitor = None, simulator = None, title = None):
     '''
     Create a raster plot of spiking activity
+
+    INPUTS:
+        monitor     -   Monitor that provides data
+        simulator   -   Simulator object for the monitor
+        title       -   Title of this plot (optional)
     '''
 
     if monitor is None: return False
+    if title is None: title = 'Raster plot of activity measured in monitor {:d}.'.format(monitor)
 
     dt = simulator.dt
     states = simulator.monitors[monitor].state.T
@@ -16,7 +22,7 @@ def raster(monitor = None, simulator = None):
     plt.matshow(states, cmap = 'gray', fignum = 1)
 
     axes = plt.gca()
-    axes.set_title('Raster plot of activity measured in monitor {:d}.'.format(monitor))
+    axes.set_title(title)
     axes.set_ylabel('Neurons')
     axes.set_xlabel('Time steps')
     axes.set_xticks(np.arange(0, states.shape[1], 1))
@@ -27,15 +33,21 @@ def raster(monitor = None, simulator = None):
     axes.set_yticks(np.arange(-.5, states.shape[0], 1), minor = True)
     axes.grid(which = 'minor', color = 'gray', linestyle = '-', linewidth = 1)
 
-def spike_train(monitor = None, simulator = None):
+def spike_train(monitor = None, simulator = None, title = None):
     '''
     Create a spike train plot of activity
+
+    INPUTS:
+        monitor     -   Monitor that provides data
+        simulator   -   Simulator object for the monitor
+        title       -   Title of this plot (optional)
     '''
 
     if monitor is None or simulator is None: return False
+    if title is None: title = 'Spike train measured in monitor {:d}.'.format(monitor)
 
     plt.figure()
-    plt.title('Spike train measured in monitor {:d}.'.format(monitor))
+    plt.title(title)
     plt.ylabel('Neurons')
     plt.xlabel('Time')
 
@@ -51,15 +63,21 @@ def spike_train(monitor = None, simulator = None):
     axes.set_ylim([-0.1, states.shape[0]+0.1])
     axes.set_yticks(np.arange(0, states.shape[0]))
 
-def continuous(monitor = None, simulator = None):
+def continuous(monitor = None, simulator = None, title = None):
     '''
     Create a spaced plot of continuous measurements across units
+
+    INPUTS:
+        monitor     -   Monitor that provides data
+        simulator   -   Simulator object for the monitor
+        title       -   Title of this plot (optional)
     '''
 
     if monitor is None or simulator is None: return False
+    if title is None: title = 'Continuous measurement unit {:d} in monitor {:d}.'.format(simulator.monitors[monitor].of, monitor)
 
     plt.figure()
-    plt.title('Continuous measurement unit {:d} in monitor {:d}.'.format(simulator.monitors[monitor].of, monitor))
+    plt.title(title)
     plt.ylabel('Unit {:d}'.format(simulator.monitors[monitor].of))
     plt.xlabel('Time')
 
@@ -74,15 +92,24 @@ def continuous(monitor = None, simulator = None):
     axes = plt.gca()
     axes.set_xlim([0-dt, states.shape[1] * dt])
     axes.set_ylim(-np.max(np.abs(states)), (states.shape[0] * spacing))
-    axes.set_yticks(np.arange(0, states.shape[0] * spacing, spacing))
+    axes.set_yticks(np.arange(0, states.shape[0] * spacing, spacing)[0:states.shape[0]])
     axes.set_yticklabels(np.arange(0, states.shape[0]))
 
-def rate_in_time(monitor = None, simulator = None, L = 1, grid = False):
+def rate_in_time(monitor = None, simulator = None, L = 1, grid = False, title = None):
     '''
     Show grid plot of firing rates of neurons across time.
 
+    INPUTS:
+        monitor     -   Monitor that provides data
+        simulator   -   Simulator object for the monitor
+        L           -   Length of window over which rates are calculated
+        grid        -   Show grid lines? (True/False)
+        title       -   Title of this plot (optional)
+
     @TODO: Implement firing rate utility functions.
     '''
+
+    if title is None: title = 'Firing rate measured in monitor {:d}.'.format(monitor)
 
     dt = simulator.dt
     states = simulator.monitors[monitor].state.T
@@ -91,7 +118,7 @@ def rate_in_time(monitor = None, simulator = None, L = 1, grid = False):
     tfr = np.zeros((states.shape[0], np.int(states.shape[1] / L)))
 
     plt.figure()
-    plt.title('Firing rate measured in monitor {:d}.'.format(monitor))
+    plt.title(title)
     plt.ylabel('Neurons')
     plt.xlabel('Time')
 

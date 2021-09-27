@@ -5,15 +5,16 @@ class Full:
     Full NxM synapses class
     '''
 
-    def __init__(self, efficacy = 1, delay = 1, n = 1, sd = 0, generator = None):
+    def __init__(self, efficacy = 1, delay = 1, n = 1, sd = 0, generator = None, directionality = None):
         '''
         Constructor
 
         INPUTS:
-            efficacy    -   Synapse weight
-            delay       -   Transmission delay
-            n           -   Previous layer size (only applicable if generator = snn.generators.Xavier)
-            generators  -   Generator function to use for sampling weights
+            efficacy        -   Synapse weight
+            delay           -   Transmission delay
+            n               -   Previous layer size (only applicable if generator = snn.generators.Xavier)
+            generators      -   Generator function to use for sampling weights
+            directionality  -   Directionality for the generator (Optional)
         '''
 
         self.efficacy = efficacy
@@ -21,6 +22,7 @@ class Full:
         self.n = n
         self.sd = sd
         self.generator = generator
+        self.directionality = directionality
 
     def synapses(self, pre = None, post = None):
         '''
@@ -45,7 +47,7 @@ class Full:
             outs = np.vstack((outs, pre_syn_post)) if outs.shape[0] > 0 else np.array(pre_syn_post)
 
         if self.generator is not None:
-            outs[:,3] = self.generator(dim = outs.shape[0], efficacy = self.efficacy, n = self.n, sd = self.sd)
+            outs[:,3] = self.generator(dim = outs.shape[0], efficacy = self.efficacy, n = self.n, sd = self.sd, directionality = self.directionality)
 
         return outs
 
@@ -54,7 +56,7 @@ class kWTA:
     kWTA class (an everybody-but-me implementation of NxM full connection)
     '''
 
-    def __init__(self, efficacy = 1, delay = 1, n = 1, sd = 0, generator = None):
+    def __init__(self, efficacy = 1, delay = 1, n = 1, sd = 0, generator = None, directionality = None):
         '''
         Constructor
 
@@ -63,6 +65,7 @@ class kWTA:
             delay       -   Transmission delay
             n           -   Previous layer size (only applicable if generator = snn.generators.Xavier)
             generators  -   Generator function to use for sampling weights
+            directionality  -   Directionality for the generator (Optional)
         '''
 
         self.efficacy = efficacy
@@ -70,6 +73,7 @@ class kWTA:
         self.n = n
         self.sd = sd
         self.generator = generator
+        self.directionality = directionality
 
     def synapses(self, pre = None, post = None):
         '''
@@ -96,7 +100,7 @@ class kWTA:
             outs = np.vstack((outs, pre_syn_post)) if outs.shape[0] > 0 else np.array(pre_syn_post)
 
         if self.generator is not None:
-            outs[:,3] = self.generator(dim = outs.shape[0], efficacy = self.efficacy, n = self.n, sd = self.sd)
+            outs[:,3] = self.generator(dim = outs.shape[0], efficacy = self.efficacy, n = self.n, sd = self.sd, directionality = self.directionality)
 
         return outs
 
@@ -105,7 +109,7 @@ class One_To_One:
     One to One connection class
     '''
 
-    def __init__(self, efficacy = 1, delay = 1, n = 1, sd = 0, generator = None):
+    def __init__(self, efficacy = 1, delay = 1, n = 1, sd = 0, generator = None, directionality = None):
         '''
         Constructor
 
@@ -114,6 +118,7 @@ class One_To_One:
             delay       -   Transmission delay
             n           -   Previous layer size (only applicable if generator = snn.generators.Xavier)
             generators  -   Generator function to use for sampling weights
+            directionality  -   Directionality for the generator (Optional)
         '''
 
         self.efficacy = efficacy
@@ -121,6 +126,7 @@ class One_To_One:
         self.n = n
         self.sd = sd
         self.generator = generator
+        self.directionality = directionality
 
     def synapses(self, pre = None, post = None):
         '''
@@ -142,7 +148,7 @@ class One_To_One:
         outs[:,4] = self.delay
 
         if self.generator is not None:
-            outs[:,3] = self.generator(dim = outs.shape[0], efficacy = self.efficacy, n = self.n, sd = self.sd)
+            outs[:,3] = self.generator(dim = outs.shape[0], efficacy = self.efficacy, n = self.n, sd = self.sd, directionality = self.directionality)
 
         return outs
 
@@ -151,7 +157,7 @@ class Percent_To_One:
     Percentage of pre to one in post class
     '''
 
-    def __init__(self, p = .25, efficacy = 1, delay = 1, n = 1, sd = 0, generator = None):
+    def __init__(self, p = .25, efficacy = 1, delay = 1, n = 1, sd = 0, generator = None, directionality = None):
         '''
         Constructor
 
@@ -160,6 +166,7 @@ class Percent_To_One:
             delay       -   Transmission delay
             n           -   Previous layer size (only applicable if generator = snn.generators.Xavier)
             generators  -   Generator function to use for sampling weights
+            directionality  -   Directionality for the generator (Optional)
         '''
 
         self.p = p
@@ -168,6 +175,7 @@ class Percent_To_One:
         self.n = n
         self.sd = sd
         self.generator = generator
+        self.directionality = directionality
 
     def synapses(self, pre = None, post = None):
         '''
@@ -191,7 +199,7 @@ class Percent_To_One:
             i_syn[:,4] = self.delay
 
             if self.generator is not None:
-                i_syn[:,3] = self.generator(dim = i_syn.shape[0], efficacy = self.efficacy, n = self.n, sd = self.sd)
+                i_syn[:,3] = self.generator(dim = i_syn.shape[0], efficacy = self.efficacy, n = self.n, sd = self.sd, directionality = self.directionality)
 
             outs = np.vstack((outs, i_syn))
 

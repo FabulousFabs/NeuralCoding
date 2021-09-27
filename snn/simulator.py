@@ -119,15 +119,17 @@ class Simulator:
                 print('\t\t{:2.2f}%.'.format(np.round(progress*100, 2)), end='\r')
 
 
+            # setup current
+            self.network.neurons[:,PARAM_UNI.I.value] = self.network.transmission[:,int(t/self.dt)]
+
+
             # update lateral inhibition (feedforward)
             for struct in self.network.structs:
                 neurons = self.network.neurons_in(struct)
-                avg = np.mean(self.network.neurons[neurons,PARAM_UNI.A.value])
-                self.network.transmission[neurons,int(t/self.dt)] += self.network.neurons[neurons,PARAM_UNI.inhib_ff.value] * (-avg)
-
-
-            # setup current
-            self.network.neurons[:,PARAM_UNI.I.value] = self.network.transmission[:,int(t/self.dt)]
+                no = neurons.shape[0]
+                neurons = np.squeeze(neurons).reshape((no,))
+                dffdt = self.solver(self.network.neurons[neurons,PARAM_UNI.ff.value], t, self.dt, proto.dffdt, neurons = self.network.neurons[neurons,:])
+                self.network.neurons[neurons,PARAM_UNI.ff.value] = self.dt * dffdt
 
 
             # integrate membrane potential per neuron type
@@ -210,12 +212,35 @@ class Simulator:
                     self.network.transmission[post,self.network.synapses[conns,4].astype(np.int)+int(t/self.dt)] += self.network.synapses[conns,3] * (np.ones((conns.shape[0],)) * Neurons.Neurons[n_t].It(outs))
 
 
+            # update pre-syn traces (arrival)
+            received_spike = np.zeros((self.network.neurons.shape[0],))
+
+            for pre in spike_indx:
+                # check we have synapses
+                if self.network.synapses.shape[0] < 1:
+                    break
+
+                conns = np.where(self.network.synapses[:,1] == pre)[0].astype(np.int)
+
+                # check it has outputs
+                if conns.shape[0] < 1:
+                    continue
+
+                received_spike[self.network.synapses[conns,2].astype(np.int)] = 1
+
+            received_spike = np.where(np.isclose(received_spike, 1, rtol=1e-3, atol=1e-3) == True)[0]
+
+            dxpdt = self.solver(self.network.neurons[:,PARAM_UNI.xp.value], t, self.dt, proto.dxdt, neurons = self.network.neurons, spike_indx = received_spike)
+            self.network.neurons[:,PARAM_UNI.xp.value] = self.network.neurons[:,PARAM_UNI.xp.value] + (self.dt * dxpdt)
+
+
             # update lateral inhibition (feedback)
             for struct in self.network.structs:
-                if t < T-self.dt:
-                    neurons = self.network.neurons_in(struct)
-                    avg = np.mean(self.network.neurons[neurons,PARAM_UNI.y.value])
-                    self.network.transmission[neurons,int(t/self.dt)+1] += self.network.neurons[neurons,PARAM_UNI.inhib_fb.value] * (-avg)
+                neurons = self.network.neurons_in(struct)
+                no = neurons.shape[0]
+                neurons = np.squeeze(neurons).reshape((no,))
+                dfbdt = self.solver(self.network.neurons[neurons,PARAM_UNI.fb.value], t, self.dt, proto.dfbdt, neurons = self.network.neurons[neurons,:])
+                self.network.neurons[neurons,PARAM_UNI.fb.value] = self.network.neurons[neurons,PARAM_UNI.fb.value] + self.dt * dfbdt
 
 
             # plasticity rules

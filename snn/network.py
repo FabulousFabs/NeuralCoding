@@ -121,10 +121,10 @@ class Network:
         Add new fibre
 
         INPUTS:
-            pre         - Presynaptic layer
-            post        - Postsynaptic layer
-            type        - Connection type
-            plasticity  - Plasticity rule to use on this fibre
+            pre             - Presynaptic layer
+            post            - Postsynaptic layer
+            type            - Connection type
+            plasticity      - Plasticity rule to use on this fibre
 
         OUTPUTS:
             fibre   - Fibre id
@@ -152,14 +152,18 @@ class Network:
 
     def reset(self):
         '''
-        Reset membrane potential, incoming currents, pre-, post-synaptic traces and adaptation currents.
+        Reset membrane potential, incoming currents, pre-, post-synaptic traces,
+        adaptation and inhibitory currents.
         '''
 
         self.neurons[:,PARAM_UNI.V.value] = self.neurons[:,PARAM_UNI.E_l.value]
         self.neurons[:,PARAM_UNI.I.value] = 0
+        self.neurons[:,PARAM_UNI.xp.value] = 1e-6
         self.neurons[:,PARAM_UNI.x.value] = 1e-6
         self.neurons[:,PARAM_UNI.y.value] = 1e-6
         self.neurons[:,PARAM_UNI.w.value] = 0
+        self.neurons[:,PARAM_UNI.ff.value] = 0
+        self.neurons[:,PARAM_UNI.fb.value] = 0
 
     def save(self, to = None):
         '''
