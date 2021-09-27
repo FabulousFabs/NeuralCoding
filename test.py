@@ -11,19 +11,18 @@ with open(os.path.join(pwd, 'models', 'pmane.npy'), 'rb') as f:
 
 
 # load current model
-with snn.Network(neuron_prototype = snn.neurons.LIF,
-                 build_from = os.path.join(pwd, 'models', 'pmane_pass{:d}.npy'.format(last_pass))) as network:
+with snn.Network(build_from = os.path.join(pwd, 'models', 'pmane_pass{:d}.npy'.format(last_pass))) as network:
     input_layer = network.structure(n = 20)
-    excitatory_layer = network.structure(n = 100, lateral_inhibition = 2.4, a = 0.0, b = 5.0, tau_k = 10.0)
+    excitatory_layer = network.structure(n = 100, inhib_ff = 1.0, inhib_fb = 1.0, a = 0.0, b = 5.0, tau_k = 10.0)
 
     in_ex = network.fibre(pre = input_layer, post = excitatory_layer,
-                          type = snn.synapses.Full(n = 20, generator = snn.generators.XavierPositive),
-                          plasticity = snn.plasticity.Oja(lr = 1e-2))
+                          type = snn.synapses.Full(n = 20, generator = snn.generators.Xavier, directionality = 1),
+                          plasticity = snn.plasticity.STDP(lr = 1e-6))
 
 
 # setup stimuli
 pmane_dir = '/project/3018012.23/stimuli/simplified_spikes/'
-stimuli = pmane_helper.find_files(pmane_dir, '1_2_1.npy')
+stimuli = pmane_helper.find_files(pmane_dir, '12_8_1.npy')
 
 
 print(np.mean(network.synapses[:,3]))
