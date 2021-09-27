@@ -20,7 +20,7 @@ dwl = np.array([])
 
 T = 50
 
-with snn.Network(neuron_prototype = snn.neurons.LIF) as net:
+with snn.Network() as net:
     ins = net.structure(n = 50)
     outs = net.structure(n = 50)
     conn = net.fibre(pre = ins, post = outs,
@@ -46,7 +46,7 @@ for i in np.arange(0, T, 1):
 vth = np.array([])
 dwh = np.array([])
 
-with snn.Network(neuron_prototype = snn.neurons.LIF) as net:
+with snn.Network() as net:
     ins = net.structure(n = 50)
     outs = net.structure(n = 50)
     conn = net.fibre(pre = ins, post = outs,

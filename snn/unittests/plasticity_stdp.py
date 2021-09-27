@@ -22,7 +22,7 @@ dt2 = np.array([])
 dw2 = np.array([])
 
 for i in np.arange(1, T+1, 1):
-    with snn.Network(neuron_prototype = snn.neurons.LIF) as net:
+    with snn.Network() as net:
         pre = net.structure(n = 1)
         post = net.structure(n = 1)
         conn = net.fibre(pre = pre, post = post,
@@ -43,7 +43,7 @@ for i in np.arange(1, T+1, 1):
     dw = np.append(dw, sim.monitors[monitor].state[0,-1] - sim.monitors[monitor].state[0,0] / sim.monitors[monitor].state[0,-1])
 
 for i in np.arange(1, T+1, 1):
-    with snn.Network(neuron_prototype = snn.neurons.LIF) as net:
+    with snn.Network() as net:
         pre = net.structure(n = 1)
         post = net.structure(n = 1)
         conn = net.fibre(pre = pre, post = post,

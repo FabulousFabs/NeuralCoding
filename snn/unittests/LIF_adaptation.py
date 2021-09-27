@@ -12,7 +12,7 @@ sys.path.append('./../..')
 import snn
 import matplotlib.pyplot as plt
 
-with snn.Network(neuron_prototype = snn.neurons.LIF) as net:
+with snn.Network() as net:
     pre = net.structure(n = 1)
     post = net.structure(n = 1, a = 0.0, b = 0.15, tau_k = 25.0)
     conn = net.fibre(pre = pre, post = post,

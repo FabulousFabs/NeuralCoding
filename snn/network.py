@@ -9,12 +9,12 @@ class Network:
     Network class
     '''
 
-    def __init__(self, neuron_prototype = LIF, build_from = None):
+    def __init__(self, build_from = None):
         '''
         Constructor
 
         INPUTS:
-            neuron_prototype    -   Prototypical neuron to use as per snn.neurons
+            build_from  -   Build network from a previously saved state?
         '''
 
         self.structs = np.array([])
@@ -22,8 +22,7 @@ class Network:
         self.neurons = np.array([], dtype = np.float)
         self.synapses = np.array([], dtype = np.float)
         self.transmission = np.array([], dtype = np.float)
-
-        self.neuron_prototype = neuron_prototype
+        
         self.ready_state = False
         self.build_from = build_from
 

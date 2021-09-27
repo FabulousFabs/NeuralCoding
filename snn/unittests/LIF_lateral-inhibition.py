@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 G_i = 1.8
 
 # feedforward activated
-with snn.Network(neuron_prototype = snn.neurons.LIF) as net:
+with snn.Network() as net:
     pre = net.structure(n = 100)
     post = net.structure(n = 25, inhib_ff = G_i, inhib_fb = 0.0)
     conn = net.fibre(pre = pre, post = post,
@@ -36,7 +36,7 @@ snn.plots.continuous(monitor = monitor_ff, simulator = sim, title = 'Feedforward
 
 
 # feedback activated
-with snn.Network(neuron_prototype = snn.neurons.LIF) as net:
+with snn.Network() as net:
     pre = net.structure(n = 100)
     post = net.structure(n = 25, inhib_ff = 0.0, inhib_fb = G_i)
     conn = net.fibre(pre = pre, post = post,
@@ -53,7 +53,7 @@ snn.plots.continuous(monitor = monitor_fb, simulator = sim, title = 'Feedback in
 
 
 # feedforward and feedback activated
-with snn.Network(neuron_prototype = snn.neurons.LIF) as net:
+with snn.Network() as net:
     pre = net.structure(n = 100)
     post = net.structure(n = 25, inhib_ff = G_i, inhib_fb = G_i)
     conn = net.fibre(pre = pre, post = post,
@@ -72,7 +72,7 @@ snn.plots.continuous(monitor = monitor_fb, simulator = sim, title = 'Feedback in
 
 
 # fully deactivated
-with snn.Network(neuron_prototype = snn.neurons.LIF) as net:
+with snn.Network() as net:
     pre = net.structure(n = 100)
     post = net.structure(n = 25, inhib_ff = 0.0, inhib_fb = 0.0)
     conn = net.fibre(pre = pre, post = post,
