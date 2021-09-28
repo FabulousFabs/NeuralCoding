@@ -49,7 +49,7 @@ for i in np.arange(0, EPOCHS, 1):
       simulator.run(T = L, inputs = input)
 
       current_behaviour = simulator.monitors[spikes].state
-      with open('fashion_phase_pass{:d}_stim{:d}.npy'.format(last_pass, f), 'wb') as current_file:
+      with open(os.path.join(pwd, 'models', 'eval', 'fashion_phase_pass{:d}_stim{:d}.npy'.format(last_pass, f)), 'wb') as current_file:
           np.save(current_file, current_behaviour)
       simulator.monitors[spikes].reset()
 
