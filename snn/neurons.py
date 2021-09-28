@@ -114,7 +114,7 @@ class Prototype:
             fb'(t) = inhib_fb * (1 / fb_tau * (yh - fb))
         '''
 
-        return kwargs['neurons'][:,PARAM_UNI.inhib_fb.value] * ((1 / kwargs['neurons'][:,PARAM_UNI.fb_tau.value]) * (np.mean(kwargs['neurons'][:,PARAM_UNI.y.value]) - fb))
+        return kwargs['neurons'][:,PARAM_UNI.inhib_fb.value] * ((1 / kwargs['neurons'][:,PARAM_UNI.fb_tau.value]) * (np.mean(kwargs['neurons'][:,PARAM_UNI.y.value]) - kwargs['neurons'][:,PARAM_UNI.fb.value]))
 
     def params(self):
         '''

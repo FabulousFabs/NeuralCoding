@@ -19,15 +19,16 @@ def Xavier(dim = 1, efficacy = 1, sd = 0, n = 1, directionality = None):
     if directionality > 0:
         return np.random.uniform(low = 1e-6, high = 2/np.sqrt(n), size = (dim,))
 
-def Gaussian(dim = 1, efficacy = 1, sd = 0, n = 1):
+def Gaussian(dim = 1, efficacy = 1, sd = 0, n = 1, directionality = None):
     '''
     Get Gaussian initialisation
 
     INPUTS:
-        dim         -   Shape of dimensons 0
-        efficacy    -   Mu of Gaussian
-        sd          -   SD of Gaussian
-        n           -   unused
+        dim             -   Shape of dimensons 0
+        efficacy        -   Mu of Gaussian
+        sd              -   SD of Gaussian
+        n               -   unused
+        directionality  -   unused
     '''
 
     return np.random.normal(loc = efficacy, scale = sd, size = (dim,))

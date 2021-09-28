@@ -8,6 +8,14 @@ class Prototype:
     '''
 
     def __init__(self):
+        
+        self.state = np.array([])
+
+    def reset(self):
+        '''
+        Reset the monitoring state
+        '''
+
         self.state = np.array([])
 
 class Spikes(Prototype):
