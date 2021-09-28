@@ -22,7 +22,7 @@ with snn.Network(build_from = os.path.join(pwd, 'models', 'pmane_pass{:d}.npy'.f
 
 # setup stimuli
 pmane_dir = '/project/3018012.23/stimuli/simplified_spikes/'
-stimuli = pmane_helper.find_files(pmane_dir, '12_8_1.npy')
+stimuli = pmane_helper.find_files(pmane_dir, '12_57_1.npy')
 
 
 print(np.mean(network.synapses[:,3]))
