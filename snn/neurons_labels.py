@@ -9,3 +9,6 @@ PARAM_UNI = Enum('UNI', 'struct type E_l V V_thr I tau_pos tau_neg xp x y a b ta
 
 # LIF labels
 PARAM_LIF = Enum('LIF', 'm N', start = len(PARAM_UNI))
+
+# GLIF1 labels
+PARAM_GLIF1 = Enum('GLIF1', '', start = len(PARAM_UNI))

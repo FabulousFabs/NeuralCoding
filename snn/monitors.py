@@ -8,7 +8,7 @@ class Prototype:
     '''
 
     def __init__(self):
-        
+
         self.state = np.array([])
 
     def reset(self):
@@ -23,7 +23,7 @@ class Spikes(Prototype):
     Spike monitor
     '''
 
-    def __init__(self, targets = None):
+    def __init__(self, targets = None, is_synapse = False):
         '''
         Constructor
 

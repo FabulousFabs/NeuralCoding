@@ -10,3 +10,4 @@ from .network import *
 from .simulator import *
 from . import monitors
 from . import plots
+from . import utils

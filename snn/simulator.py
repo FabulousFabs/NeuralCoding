@@ -57,7 +57,7 @@ class Simulator:
         if of is None:
             self.monitors.append(monitor_type(targets = targets))
         else:
-            self.monitors.append(monitor_type(targets = targets, of = of, is_synapse = is_synapse))
+            self.monitors.append(monitor_type(targets = targets, is_synapse = is_synapse))
 
         return len(self.monitors)-1
 
