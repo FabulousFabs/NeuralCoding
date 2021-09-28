@@ -59,11 +59,11 @@ for i in np.arange(0, EPOCHS, 1):
   print('mean weight change:')
   print(np.mean(np.abs(weights_1 - weights_2)))
 
-  network.save(os.path.join(pwd, 'models', 'pmane_pass{:d}.npy'.format(last_pass+1)))
+  network.save(os.path.join(pwd, 'models', 'fashion_phase_pass{:d}.npy'.format(last_pass+1)))
 
 
   # save current pass
-  with open(os.path.join(pwd, 'models', 'pmane.npy'), 'wb') as f:
+  with open(os.path.join(pwd, 'models', 'fashion_phase.npy'), 'wb') as f:
       last_pass = last_pass + 1
       np.save(f, last_pass)
 
