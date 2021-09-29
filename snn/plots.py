@@ -2,6 +2,8 @@ import numpy as np
 import numpy.matlib
 import matplotlib.pyplot as plt
 
+from . import utils
+
 def raster(monitor = None, simulator = None, title = None):
     '''
     Create a raster plot of spiking activity
@@ -95,7 +97,7 @@ def continuous(monitor = None, simulator = None, title = None):
     axes.set_yticks(np.arange(0, states.shape[0] * spacing, spacing)[0:states.shape[0]])
     axes.set_yticklabels(np.arange(0, states.shape[0]))
 
-def rate_in_time(monitor = None, simulator = None, L = 1, grid = False, title = None):
+def rate_in_time(monitor = None, simulator = None, L = 1, grid = False, title = None, rf = utils.ratefunctions.linear_filter_and_kernel):
     '''
     Show grid plot of firing rates of neurons across time.
 
@@ -105,26 +107,19 @@ def rate_in_time(monitor = None, simulator = None, L = 1, grid = False, title = 
         L           -   Length of window over which rates are calculated
         grid        -   Show grid lines? (True/False)
         title       -   Title of this plot (optional)
-
-    @TODO: Implement firing rate utility functions.
+        rf          -   Rate function to use (optional)
     '''
 
     if title is None: title = 'Firing rate measured in monitor {:d}.'.format(monitor)
 
     dt = simulator.dt
     states = simulator.monitors[monitor].state.T
-    states = np.pad(states, ((0,0), (0, L-(states.shape[1] % L))), 'constant', constant_values = 0)
-    states[np.isnan(states)] = 0.0
-    tfr = np.zeros((states.shape[0], np.int(states.shape[1] / L)))
+    tfr = rf(states, dt, delta_t = L)
 
     plt.figure()
     plt.title(title)
     plt.ylabel('Neurons')
     plt.xlabel('Time')
-
-    for i in np.arange(0, tfr.shape[1], 1):
-        tfr[:,i] = np.mean(states[:,i*L:(i*L+L)], axis = 1) / dt
-
     plt.imshow(tfr, cmap = 'hot', interpolation = 'nearest')
     plt.colorbar()
 
