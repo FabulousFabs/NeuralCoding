@@ -1,5 +1,7 @@
 import numpy as np
 
+from . import synapses_filters as filters
+
 class Full:
     '''
     Full NxM synapses class

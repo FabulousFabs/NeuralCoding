@@ -4,6 +4,7 @@ from .solvers import *
 from .monitors import *
 from . import plasticity
 from . import neurons as Neurons
+from . import synapses as Synapses
 from .neurons_labels import *
 
 class Simulator:
@@ -123,6 +124,17 @@ class Simulator:
             self.network.neurons[:,PARAM_UNI.I.value] = self.network.transmission[:,int(t/self.dt)]
 
 
+            # update synaptic filters (pre step)
+            for f_t in Synapses.filters.Filters:
+                f_i_t = np.where(np.round(self.network.synapses_filters[:,0]) == Synapses.filters.Filters[f_t].type)[0]
+
+                # check for filters of this type
+                if f_i_t.shape[0] < 1:
+                    continue
+
+                self.network.synapses_filters[f_i_t,:], self.network.synapses[f_i_t,:] = Synapses.filters.Filters[f_t].pre(t, self.dt, self.network.synapses_filters[f_i_t,:], self.network.synapses[f_i_t,:], self.network.synapses)
+
+
             # update lateral inhibition (feedforward)
             for struct in self.network.structs:
                 neurons = self.network.neurons_in(struct)
@@ -171,6 +183,17 @@ class Simulator:
             # update post-syn traces
             dydt = self.solver(self.network.neurons[:,PARAM_UNI.y.value], t, self.dt, proto.dydt, neurons = self.network.neurons, spike_indx = spike_indx)
             self.network.neurons[:,PARAM_UNI.y.value] = self.network.neurons[:,PARAM_UNI.y.value] + (self.dt * dydt)
+
+
+            # update synaptic filters (post step)
+            for f_t in Synapses.filters.Filters:
+                f_i_t = np.where(np.round(self.network.synapses_filters[:,0]) == Synapses.filters.Filters[f_t].type)[0]
+
+                # check for filters of this type
+                if f_i_t.shape[0] < 1:
+                    continue
+
+                self.network.synapses_filters[f_i_t,:], self.network.synapses[f_i_t,:] = Synapses.filters.Filters[f_t].post(t, self.dt, self.network.synapses_filters[f_i_t,:], self.network.synapses[f_i_t,:], self.network.synapses)
 
 
             # push to monitors
@@ -250,15 +273,19 @@ class Simulator:
 
                     if np.all(np.isnan(self.network.synapses[synapses,5]) == False):
                         pre = self.network.neurons[self.network.synapses[synapses,1].astype(np.int),:]
+                        pre = np.squeeze(pre).reshape((pre.shape[0], self.network.neurons.shape[1]))
                         post = self.network.neurons[self.network.synapses[synapses,2].astype(np.int),:]
+                        post = np.squeeze(post).reshape((post.shape[0], self.network.neurons.shape[1]))
+                        syn = self.network.synapses[synapses,:]
+                        syn = np.squeeze(syn).reshape((synapses.shape[0], self.network.synapses.shape[1]))
 
                         # floating point work-around
-                        rule = np.round(np.mean(self.network.synapses[synapses,5])).astype(np.int)
+                        rule = np.round(np.mean(syn[:,5])).astype(np.int)
 
                         # updates
-                        s_x = np.isin(self.network.synapses[synapses,1], spike_indx)
-                        s_y = np.isin(self.network.synapses[synapses,2], spike_indx)
-                        dwdt = self.solver(self.network.synapses[synapses,3], t, self.dt, plasticity.Rules[rule].dwdt, pre = pre, post = post, synapses = self.network.synapses[synapses], s_x = s_x, s_y = s_y)
+                        s_x = np.isin(syn[:,1], spike_indx)
+                        s_y = np.isin(syn[:,2], spike_indx)
+                        dwdt = self.solver(syn[:,3], t, self.dt, plasticity.Rules[rule].dwdt, pre = pre, post = post, synapses = syn, s_x = s_x, s_y = s_y).reshape((syn.shape[0], 1))
                         dwdt[np.where(np.isnan(dwdt))] = 0.0
                         self.network.synapses[synapses,3] += self.dt * dwdt
 

@@ -2,6 +2,7 @@ import numpy as np
 
 from .neurons import *
 from .synapses import *
+from . import synapses_filters
 from .neurons_labels import *
 
 class Network:
@@ -21,8 +22,9 @@ class Network:
         self.fibres = np.array([])
         self.neurons = np.array([], dtype = np.float)
         self.synapses = np.array([], dtype = np.float)
+        self.synapses_filters = np.array([], dtype = np.float)
         self.transmission = np.array([], dtype = np.float)
-        
+
         self.ready_state = False
         self.build_from = build_from
 
@@ -115,7 +117,7 @@ class Network:
 
         return struct
 
-    def fibre(self, pre = None, post = None, type = None, plasticity = None):
+    def fibre(self, pre = None, post = None, type = None, plasticity = None, filter = None):
         '''
         Add new fibre
 
@@ -144,7 +146,15 @@ class Network:
         else:
             new[:,5] = np.nan
 
+        if filter is not None:
+            f = filter.params
+            filter = np.tile(f, (new.shape[0], 1))
+        else:
+            filter = np.zeros((new.shape[0], synapses_filters.FLAG_PARAMS_SIZE))
+            filter[:,0] = -1
+
         self.synapses = np.vstack((self.synapses, new)) if self.synapses.shape[0] > 0 else np.array(new)
+        self.synapses_filters = np.vstack((self.synapses_filters, filter)) if self.synapses_filters.shape[0] > 0 else np.array(filter)
         self.fibres = np.vstack((self.fibres, np.array([fibre]))) if self.fibres.shape[0] > 0 else np.array([fibre])
 
         return fibre

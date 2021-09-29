@@ -33,7 +33,7 @@ def raster(monitor = None, simulator = None, title = None):
     axes.set_yticks(np.arange(-.5, states.shape[0], 1), minor = True)
     axes.grid(which = 'minor', color = 'gray', linestyle = '-', linewidth = 1)
 
-def spike_train(monitor = None, simulator = None, title = None):
+def spike_train(monitor = None, simulator = None, title = None, marker = '|', linewidth = 0.5):
     '''
     Create a spike train plot of activity
 
@@ -56,7 +56,7 @@ def spike_train(monitor = None, simulator = None, title = None):
     states[states[:,:] == 0] = np.nan
 
     for i in range(states.shape[0]):
-        plt.scatter(np.arange(states.shape[1]) * dt, states[i,:] * i, marker='|', linewidths=0.5)
+        plt.scatter(np.arange(states.shape[1]) * dt, states[i,:] * i, marker=marker, linewidth=linewidth)
 
     axes = plt.gca()
     axes.set_xlim([0-dt, states.shape[1] * dt])
