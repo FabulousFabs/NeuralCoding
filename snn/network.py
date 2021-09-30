@@ -152,7 +152,7 @@ class Network:
         else:
             filter = np.zeros((new.shape[0], synapses_filters.FLAG_PARAMS_SIZE))
             filter[:,0] = -1
-
+        
         self.synapses = np.vstack((self.synapses, new)) if self.synapses.shape[0] > 0 else np.array(new)
         self.synapses_filters = np.vstack((self.synapses_filters, filter)) if self.synapses_filters.shape[0] > 0 else np.array(filter)
         self.fibres = np.vstack((self.fibres, np.array([fibre]))) if self.fibres.shape[0] > 0 else np.array([fibre])
