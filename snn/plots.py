@@ -140,26 +140,40 @@ def network(net = None, struct_spacing = 0.2, fibre_spacing = 0.012, cmap_neuron
             cmap_synapses = 'binary', cmap_synapses_by_fibre = True, synapse_alpha = 0.1, labels_struct = None,
             labels_fibre = None, show_labels_struct = True, show_labels_fibre = False):
     '''
+    Create a neat plot of the network structure (using a mini force-directed physics
+    simulation for the layout of each structure). This function can also be used to
+    show activity of the network across a simulated episode if the simulator and the
+    corresponding monitor are passed.
+
+    NOTE: Animation is very slow and, hence, not available as a live view. Animations
+    are automatically saved to disc as such (set cmap_anim_save_to).
+
     INPUTS:
-        net
-        struct_spacing
-        fibre_spacing
-        cmap_neurons
-        cmap_neurons_by_struct
-        cmap_neurons_by_state
-        cmap_neurons_use_kernel
-        cmap_neurons_kernel_L
-        cmap_neurons_monitor
-        cmap_neurons_sim
-        cmap_anim_interval
-        cmap_anim_save_to
-        cmap_synapses
-        cmap_synapses_by_fibre
-        synapses_alpha
-        labels_struct
-        labels_fibre
-        show_labels_struct
-        show_labels_fibre
+        net                         -   Network object
+        struct_spacing              -   Spacing between structures (default = 0.2)
+        fibre_spacing               -   Spacing between fibres (default = 0.012)
+        cmap_neurons                -   Name of the colourmap for neurons
+        cmap_neurons_by_struct      -   Colour neurons by structure? (True/False)
+        cmap_neurons_by_state       -   Colour neurons by state (True/False)
+                                        NOTE: This enables the animation and requires
+                                        that you provide cmap_neurons_sim as well as
+                                        cmap_neurons_monitor
+        cmap_neurons_use_kernel     -   Use a kernel for animation plots that spaces
+                                        states in a gaussian mix (True/False). Note
+                                        that this is useful only for spiking behaviour.
+        cmap_neurons_kernel_L       -   Length of the kernel (how much smoothing to
+                                        apply in T)
+        cmap_neurons_monitor        -   Monitor identifier (for animation)
+        cmap_neurons_sim            -   Simulator object (for animation)
+        cmap_anim_interval          -   Time between frames (for animation)
+        cmap_anim_save_to           -   File name (for animation)
+        cmap_synapses               -   Name of colourmap for synapses
+        cmap_synapses_by_fibre      -   Colour synapses by fibre? (True/False)
+        synapses_alpha              -   Alpha level of plotted synapses (default = 0.1)
+        labels_struct               -   Labels of the structures.
+        labels_fibre                -   Labels of the fibres.
+        show_labels_struct          -   Show structure labels? (True/False)
+        show_labels_fibre           -   Show fibre labels? (True/False)
     '''
 
     if net is None or (cmap_neurons_by_state is True and (cmap_neurons_monitor is None or cmap_neurons_sim is None)): return False

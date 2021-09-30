@@ -1,9 +1,10 @@
 '''
-Unit test for adaptation currents.
+Unit test for animating the network through an epoch.
 
-Creates two neurons, neuron A spiking at B at every time step. Creates plots of
-the spike train, the firing rate evolution in time and adaptation current w in
-time.
+Creates a simple network of A (rate coding) and D (phase coding) that fire at
+B (classifier) that is inhibited by the feedback population C. The network is
+simulated for arbitrary inputs and animated. See plot_network_animated.gif for
+outputs.
 '''
 
 import numpy as np

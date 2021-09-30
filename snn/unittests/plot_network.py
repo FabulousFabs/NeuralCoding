@@ -1,9 +1,7 @@
 '''
-Unit test for adaptation currents.
+Unit test for network plot.
 
-Creates two neurons, neuron A spiking at B at every time step. Creates plots of
-the spike train, the firing rate evolution in time and adaptation current w in
-time.
+This produces a neat graphical representation of the neural structures created.
 '''
 
 import numpy as np
