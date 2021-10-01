@@ -26,7 +26,7 @@ def rate(homogenous = True, inputs = None, L = None, lam = None):
         N = inputs.shape[0]
 
         for n in np.arange(0, N, 1):
-            y_n = generators.Poisson(homogenous = False, dim = (1, L), rf = lambda x: ((inputs[n,x]/lam) / L / (1000 / L)))
+            y_n = generators.Poisson(homogenous = False, dim = (1, L), rf = lambda x: ((inputs[n,np.clip(x, 0, L-1).astype(np.int)]/lam) / L / (1000 / L)))
             y = np.vstack((y, y_n)) if y.shape[0] > 0 else np.array(y_n)
 
         return y

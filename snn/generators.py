@@ -68,7 +68,7 @@ def Poisson(dim = (1,1), r = 1, homogenous = True, rf = None):
 
     t = np.arange(0, dim[1], 1) * np.ones(dim)
     rb = .5 * (rf(t) + rf(t+1))
-    pb = 1 - np.exp(-rb * 1 * 1e-3)
+    pb = 1 - np.exp(-rb * 1)
     s = np.random.uniform(size = dim)
 
     return np.array(pb >= s).astype(np.int)
