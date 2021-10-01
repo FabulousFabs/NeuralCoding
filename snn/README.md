@@ -796,3 +796,85 @@ whereby weights are now going to decay exponentially within an epoch (but, again
 - __OUTPUTS__
   - `MUX`:
     - Network identifiers for `A` (activate), `I0`, `I1`, `S`, `O`, `D` (done) in a dictionary
+
+## 10 - `snn.neurons`: Class collection
+### 10.1 - `snn.neurons.Prototype`:
+- This class should not be used
+- It is the prototype for neuron types to be built from
+- __PARAMETERS__
+  - `struct = -1`:
+    - Structure placeholder
+  - `type = -1`:
+    - Type placeholder
+  - `E_l = 0.0`:
+    - Reset potential
+  - `V = E_l`:
+    - Membrane potential
+  - `V_thr = 1.0`:
+    - Spiking threshold
+  - `I = 0.0`:
+    - Incoming current
+  - `tau_pos = 10.0`:
+    - Positive spike trace tau constant
+  - `tau_neg = 10.0`:
+    - Negative spike trace tau constant
+  - `xp = 1e-6`:
+    - Presynaptic spike trace (of arrivals)
+  - `x = 1e-6`:
+    - Presynaptic spike trace
+  - `y = 1e-6`:
+    - Postsynaptic spike trace
+  - `a = 0.0`:
+    - Adaptation constant alpha
+  - `b = 0.0`:
+    - Adaptation constant beta
+  - `tau_k = 10.0`:
+    - Adaptation time constant
+  - `w = 0.0`:
+    - Adaptation current
+  - `A = 1.0`:
+    - Output current
+  - `inhib_ff = 0.0`:
+    - Lateral inhibition (feedforward)
+  - `inhib_fb = 0.0`:
+    - Lateral inhibition (feedback)
+  - `ff0 = 0.1`:
+    - Feedforward inhibition zero
+  - `ff_mva = 0.0`:
+    - Feedforward max vs average scaling
+  - `fb_tau = 1.4`:
+    - Feedback inhibition time constant
+  - `ff = 0.0`:
+    - Incoming feedforward inhibition
+  - `fb = 0.0`:
+    - Incoming feedback inhibition
+- Computes presynaptic traces as per:
+  - <img src="https://render.githubusercontent.com/render/math?math=x%27(t)%20=%20\frac{1}{\tau_{pos}}%20\times%20(-x%20%2b%20%20a_p(x)%20\times%20s)">
+  - <img src="https://render.githubusercontent.com/render/math?math=a_p(x)%20=%201%20-%20x">
+- Computes postsynaptic traces as per:
+  - <img src="https://render.githubusercontent.com/render/math?math=y%27(t)%20=%20\frac{1}{\tau_{neg}}%20\times%20(-y%20%2b%20%20a_n(y)%20\times%20s)">
+  - <img src="https://render.githubusercontent.com/render/math?math=a_n(x)%20=%201%20%20\%20\textrm{where}%20x%20>%200">
+  - <img src="https://render.githubusercontent.com/render/math?math=a_n(x)%20=%200%20%20\%20\textrm{where}%20x%20\leq%200">
+- Computes feedforward inhibition updates as per:
+  - <img src="https://render.githubusercontent.com/render/math?math=\textrm{ff}%27(t)%20=%20\textrm{inhib}_{ff}%20\times%20(\textrm{xh}%20-%20\textrm{ff}_0)%20\times%20\textrm{xm}">
+  - <img src="https://render.githubusercontent.com/render/math?math=\textrm{xh}%20=%20I%20%2b%20\textrm{ff}_{mva}%20\times%20(\textrm{max}(I)%20-%20<I>)">
+  - <img src="https://render.githubusercontent.com/render/math?math=\textrm{xm}%20=%201%20\%20\textrm{where}\%20%20\textrm{ff}_0%20%3C%20\%20\textrm{xh}\%20%20\%20\textrm{else}\%20%20\textrm{xm}%20=%200">
+- Computes feedback inhibition updates as per
+  - <img src="https://render.githubusercontent.com/render/math?math=\textrm{fb}%27(t)%20=%20\textrm{inhib}_{fb}%20\times%20(\frac{1}{\tau}%20\times%20(%3Cy%3E%20-%20\textrm{fb}))">
+
+### 10.2 - `snn.neurons.LIF_NMC`: Method
+- Standard LIF neuromorphics class
+- __PARAMETERS__
+  - `m = 1`:
+    - Decay constant
+  - `N = 0.0`:
+    - Input noise scale
+  - `rng = np.random.RandomState()`
+    - Random number generator
+- Computes `dVdt` as per:
+  - <img src="https://render.githubusercontent.com/render/math?math=V%27(t)%20=%20V%20\times%20m%20%2b%20(I_e%20-%20I_{ff}%20-%20I_{fb}%20%2b%20N(t))">
+  - <img src="https://render.githubusercontent.com/render/math?math=N(t)%20=%20N(\mu,%20\sigma)\%20\textrm{where}\%20N%20>%200\%20\textrm{else}\%20N(T)%20=%200">
+- Computes `dwdt`as per:
+  - <img src="https://render.githubusercontent.com/render/math?math=w%27(t)%20=%20\frac{1}{\tau_k}%20\times%20(a%20\times%20(V%20-%20E_l)%20-%20w_k%20%2b%20b_k%20\times%20\tau_k%20\times%20s)">
+- Computes `I(t)` as per:
+  - <img src="https://render.githubusercontent.com/render/math?math=I(T)%20=%20A">
