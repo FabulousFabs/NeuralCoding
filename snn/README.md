@@ -659,12 +659,14 @@ whereby weights are now going to decay exponentially within an epoch (but, again
 - Implements an AND-gate in the supplied network
 - __DT__ 1
 - __TRUTHTABLE__
+```
 | I0 | I1 | O  |
-| --- | --- | --- |
+| -- | -- | -- |
 | 0  | 0  | 0  |
 | 0  | 1  | 0  |
 | 1  | 0  | 0  |
 | 1  | 1  | 1  |
+```
 - __INPUTS__
   - `net`:
     - Network object
@@ -676,12 +678,14 @@ whereby weights are now going to decay exponentially within an epoch (but, again
 - Implements an OR-gate in the supplied network
 - __DT__ 1
 - __TRUTHTABLE__
+```
 | I0 | I1 | O  |
-| --- | --- | --- |
+| -- | -- | -- |
 | 0  | 0  | 0  |
 | 0  | 1  | 1  |
 | 1  | 0  | 1  |
 | 1  | 1  | 1  |
+```
 - __INPUTS__
   - `net`:
     - Network object
@@ -694,12 +698,14 @@ whereby weights are now going to decay exponentially within an epoch (but, again
 - __NOTE__ that this requires `A` to be activated by a spike in the same time step as `I0` / `I1`
 - __DT__ 1
 - __TRUTHTABLE__
+```
 | I0 | I1 | O  |
-| --- | --- | --- |
+| -- | -- | -- |
 | 0  | 0  | 1  |
 | 0  | 1  | 0  |
 | 1  | 0  | 0  |
 | 1  | 1  | 0  |
+```
 - __INPUTS__
   - `net`:
     - Network object
@@ -712,12 +718,14 @@ whereby weights are now going to decay exponentially within an epoch (but, again
 - __NOTE__ that this requires `A` to be activated by a spike in the same time step as `I0` / `I1`
 - __DT__ 1
 - __TRUTHTABLE__
+```
 | I0 | I1 | O  |
-| --- | --- | --- |
+| -- | -- | -- |
 | 0  | 0  | 1  |
 | 0  | 1  | 1  |
 | 1  | 0  | 1  |
 | 1  | 1  | 0  |
+```
 - __INPUTS__
   - `net`:
     - Network object
@@ -730,12 +738,14 @@ whereby weights are now going to decay exponentially within an epoch (but, again
 - __NOTE__ that this requires `A` to be activated by a spike in the same time step as `I0` / `I1`
 - __DT__ 4
 - __TRUTHTABLE__
+```
 | I0 | I1 | O  |
-| --- | --- | --- |
+| -- | -- | -- |
 | 0  | 0  | 0  |
 | 0  | 1  | 1  |
 | 1  | 0  | 1  |
 | 1  | 1  | 0  |
+```
 - __INPUTS__
   - `net`:
     - Network object
@@ -748,12 +758,14 @@ whereby weights are now going to decay exponentially within an epoch (but, again
 - __NOTE__ that this requires `A` to be activated by a spike in the same time step as `I0` / `I1`
 - __DT__ 4
 - __TRUTHTABLE__
+```
 | I0 | I1 | O  |
-| --- | --- | --- |
+| -- | -- | -- |
 | 0  | 0  | 1  |
 | 0  | 1  | 0  |
 | 1  | 0  | 0  |
 | 1  | 1  | 1  |
+```
 - __INPUTS__
   - `net`:
     - Network object
@@ -766,8 +778,9 @@ whereby weights are now going to decay exponentially within an epoch (but, again
 - __NOTE__ that this requires `A` to be activated by a spike in the same time step as `I0` / `I1`
 - __DT__ 4
 - __TRUTHTABLE__
+```
 | S0 | I0 | I1 | O  |
-| --- | --- | --- | --- |
+| -- | -- | -- | -- |
 | 0  | 0  | 0  | 0  |
 | 0  | 1  | 0  | 1  |
 | 0  | 0  | 1  | 0  |
@@ -776,6 +789,7 @@ whereby weights are now going to decay exponentially within an epoch (but, again
 | 1  | 1  | 0  | 0  |
 | 1  | 0  | 1  | 1  |
 | 1  | 1  | 1  | 1  |
+```
 - __INPUTS__
   - `net`:
     - Network object
