@@ -96,7 +96,7 @@ Of course, in most ML-oriented scenarios, sharing the same weight between two st
                                                     directionality = -1))
   ...
 ```
-For `fib_excite` and `fib_feedback` we have now specified generators for weight initialisation. `snn.generatos.Xavier` gets parameters `n` and `directionality` each, with `n` referring to the pre-synpatic population size for normalisation and `directionality` indicating excitatory, inhibitory or mixed weighting (1, -1, 0, respectively).
+For `fib_excite` and `fib_feedback` we have now specified generators for weight initialisation. `snn.generatos.Xavier` gets parameters `n` and `directionality` each, with `n` referring to the pre-synpatic population size for normalisation and `directionality` indicating excitatory, inhibitory or mixed weighting (1, -1, None, respectively).
 
 ## Learning
 To enable learning, simply specify a plasticity rule when initialising a fibre. This can be achieved by modifying the basic usage example as follows:
@@ -395,4 +395,390 @@ whereby weights are now going to decay exponentially within an epoch (but, again
 ### 3.6 - `snn.plots.show`: Method
 - Show plots (short-hand to avoid imports in main)
 
- 
+## 4 - `snn.solvers`: Utility methods
+### 4.1 - `snn.solvers.Heuns`: Method
+- Heun's method for solving differential equations
+- __INPUTS__
+  - `x0`:
+    - State of x at t
+  - `t0`:
+    - Time t
+  - `dt`:
+    - Time step size
+  - `dxdt`:
+    - Function to solve
+  - `**kwargs`:
+    - Additional named parameters to pass to `dxdt`
+
+### 4.2 - `snn.solvers.Eulers`: Method
+- Euler's method for solving differential equations
+- __INPUTS__
+  - `x0`:
+    - State of x at t
+  - `t0`:
+    - Time t
+  - `dt`:
+    - Time step size
+  - `dxdt`:
+    - Function to solve
+  - `h = None`:
+    - Effective dt for iterations
+    - If `None`, then `h = dt / n`
+  - `n = 10`:
+    - Number of iterations to compute
+  - `**kwargs`:
+    - Additional named parameters to pass to `dxdt`
+
+### 4.3 - `snn.solvers.RungeKutta`: Method
+- Runge-Kutta's method for solving differential equations
+- __INPUTS__
+  - `x0`:
+    - State of x at t
+  - `t0`:
+    - Time t
+  - `dt`:
+    - Time step size
+  - `dxdt`:
+    - Function to solve
+  - `h = None`:
+    - Effective dt for iterations
+    - If `None`, then `h = dt / n`
+  - `n = 10`:
+    - Number of iterations to compute
+  - `**kwargs`:
+    - Additional named parameters to pass to `dxdt`
+
+### 4.4 - `snn.solvers.Clean`: Method
+- Does not solve but uses a simple step (calls `dxdt` directly)
+- __INPUTS__
+  - `x0`:
+    - State of x at t
+  - `t0`:
+    - Time t
+  - `dt`:
+    - Time step size
+  - `dxdt`:
+    - Function to solve
+  - `**kwargs`:
+    - Additional named parameters to pass to `dxdt`
+
+## 5 - `snn.monitors`: Collection of classes
+- Please see documentation of `snn.Simulator.monitor`
+
+### 5.1 - `snn.monitors.Spikes`: Class
+- Use to capture spikes
+- Not applicable to fibres
+
+### 5.2 - `snn.monitors.States`: Class
+- Use to capture states
+- Applicable to structures of fibres
+
+## 6 - `snn.generators`: Utility methods
+### 6.1 - `snn.generators.Xavier`: Method
+- Get Xavier initialisation
+- __INPUTS__
+  - `dim = 1`:
+    - Shape of dimension zero
+  - `n = 1`:
+    - Number of neurons in previous layer
+  - `directionality = None`:
+    - Tail of distribution (1, -1, or None for double)
+- __OUTPUTS__
+  - `y`:
+    - Xavier samples
+
+### 6.2 - `snn.generators.Gaussian`: Method
+- Get Gaussian initialisation
+- __INPUTS__
+  - `dim = 1`:
+    - Shape of dimension zero
+  - `efficacy = 1`:
+    - Mu of Gaussian
+  - `sd = 0`:
+    - SD of Gaussian
+- __OUTPUTS__
+  - `y`:
+    - Gaussian samples
+
+### 6.3 - `snn.generators.Uniform`: Method
+- Get uniform initialisation
+- __INPUTS__
+  - `dim = 1`:
+    - Shape of dimension zero
+  - `efficacy = 1`:
+    - Lower and upper bound of distribution
+  - `directionality`:
+    - Tail of distribution (1, -1, or None for double)
+- __OUTPUTS__
+  - `y`:
+    - Uniform samples
+
+### 6.4 - `snn.generators.Poisson`: Method
+- Get Poisson distribution of size = dim with rate of events = r
+- __INPUTS__
+  - `dim = (1, 1)`:
+    - Shape of outputs
+  - `r = 1`:
+    - Rate of events (if homogenous)
+  - `homogenous = True`:
+    - Sample homogenous Poisson?
+    - If `False`, `rf` is required
+  - `rf = None`:
+    - Rate function for events for inhomogenous process
+- __OUTPUTS__
+  - `y`:
+    - Poisson samples
+
+## 7 - `snn.utils.ratefunctions`: Utility methods
+### 7.1 - `snn.utils.ratefunctions.spike_count`: Method
+- Returns spike count over time as per <img src="https://render.githubusercontent.com/render/math?math=r(N,%20T)%20=%20N%20/%20T">
+- __INPUTS__
+  - `states`:
+    - Spiking object from monitor
+- __OUTPUT__
+  - `r`:
+    - Rate value
+
+### 7.2 - `snn.utils.ratefunctions.linear_filter_and_kernel`: Method
+- Returns TFR from convolution with linear filter
+- __INPUTS__
+  - `states`:
+    - Spiking object from monitor
+  - `dt = 1e-3`:
+    - Time step size
+  - `delta_t = 10`:
+    - Time steps per window
+- __OUTPUTS__
+  - `tfr`:
+    - Time-frequency representation
+
+### 7.3 - `snn.utils.ratefunction.gaussian_and_kernel`: Method
+- Returns TFR from convolution with Gaussian
+- __INPUTS__
+  - `states`:
+    - Spiking object from monitor
+  - `dt = 1e-3`:
+    - Time step size
+  - `delta_t = 10`:
+    - Time steps per window
+- __OUTPUTS__
+  - `tfr`:
+    - Time-frequency representation
+
+## 8 - `snn.utils.neuralcoding`: Utility methods
+### 8.1 - `snn.utils.neuralcoding.rate`: Method
+- Returns a rate encoding of the stimulus using a Poisson spike train as per
+  - Guo, W., Fouda, M.E., Eltawil, A.M., & Salama, K.N. (2021). Neural coding in spiking neural networks: A comparative study for robust neuromorphic systems. Frontiers in Neuroscience, 15, e638474. DOI: http://dx.doi.org/10.3389/fnins.2021.638474
+- __INPUTS__
+  - `inputs`:
+    - Input vector (neuron x input)
+  - `L`:
+    - Length of output vector
+  - `lam`:
+    - Lambda for transforming input values (practical inverse scaling of Hz)
+  - `homogenous = True`:
+    - If `False`, indicates `inputs` is time-varying signal and uses inhomogenous Poisson distribution
+- __OUTPUTS__
+  - `y`:
+    - Rate-encoded spike train
+
+### 8.2 - `snn.utils.neuralcoding.ttfs`: Method
+- Returns a time-to-first-spike encoding of the stimulus as per
+  - Park, S., Kim, S.J., Na, B., & Yoon, S. (2020). T2FSNN: Deep spiking neural networks with time-to-first-spike coding. Proceedings of the 2020 57th ACM/IEEE Design Automation Conference. DOI: http://dx.doi.org/10.1109/DAC18072.2020.9218689
+- __NOTE__ that this currently only supports 1d inputs
+- __NOTE__ that this form of encoding relies on a weight decay function that effectively mirrors P_th computed (see `snn.synapses.filters.ExponentialDecay`)
+- __INPUTS__
+  - `inputs`:
+    - Input vector (neuron x input)
+  - `max`:
+    - Maximum value of input
+  - `T = 1`:
+    - Desired total time (relative to dt)
+  - `dt = 1e-3`:
+    - Time step size
+  - `theta_0 = 1.0`:
+    - Event threshold
+  - `tau_theta = 10.0`:
+    - Time constant for exponential decay
+- __OUTPUTS__
+  - `y`
+    - TTFS-encoded spike train
+
+### 8.3 - `snn.utils.neuralcoding.phase`: Method
+- Returns a phase encoding of the stimulus as per
+  - Kim, J., Kim, H., Huh, S., Lee, J., & Choi, K. (2018). Deep neural networks with weighted spikes. Neurocomputing, 311, 373-386. DOI: http://dx.doi.org/10.1016/j.neucom.2018.05.087
+- __NOTE__ that this form of encoding requires a weight updating filter by current phase of encoding (see `snn.synapses.filters.Phase`)
+- __INPUTS__
+  - `inputs`:
+    - Input vector (neuron x input)
+  - `L`:
+    - Length of output vector
+  - `bits = 8`:
+    - Number of bits to encode but ensure that `2**bits >= max(inputs)` and `min(inputs) >= 0`
+- __OUTPUTS__
+  - `y`:
+    - Phase-encoded spike train
+
+### 8.4 - `snn.utils.neuralcoding.burst`: Method
+- Returns a burst encoding of the stimulus as per
+  - Guo, W., Fouda, M.E., Eltawil, A.M., & Salama, K.N. (2021). Neural coding in spiking neural networks: A comparative study for robust neuromorphic systems. Frontiers in Neuroscience, 15, e638474. DOI: http://dx.doi.org/10.3389/fnins.2021.638474
+- __NOTE__ that this does not yet support inputs that vary in time.
+- __INPUTS__
+  - `inputs`:
+    - Input vector (neurons x input)
+  - `L`:
+    - Desired output length
+  - `max`:
+    - Maximum value of input
+  - `N_max = 5.0`:
+    - Maximum number of spikes in burst
+  - `T_min = 2.0`:
+    - Minimum ISI
+  - `T_max = None`:
+    - Maximum ISI
+    - If `None`, `T_max = L`
+- __OUTPUTS__
+  - `y`:
+    - Burst-encoded spike train
+
+## 9 - `snn.utils.gates`: Utility methods
+### 9.1 - `snn.utils.gates.CLOCK`: Method
+- Implements a clock in the supplied network.
+- __INPUTS__
+  - `net`:
+    - Network object
+  - `tau = 1`:
+    - Time constant (i.e., one beat every tau steps)
+  - `start_ticking = True`:
+    - Start clock now?
+- __OUTPUTS__
+  - `CLOCK`:
+    - Network identifier for CLOCK
+
+### 9.2 - `snn.utils.gates.AND`: Method
+- Implements an AND-gate in the supplied network
+- __DT__ 1
+- __TRUTHTABLE__
+| I0 | I1 | O  |
+| -- | -- | -- |
+| 0  | 0  | 0  |
+| 0  | 1  | 0  |
+| 1  | 0  | 0  |
+| 1  | 1  | 1  |
+- __INPUTS__
+  - `net`:
+    - Network object
+- __OUTPUTS__
+  - `AND`:
+    - Network identifiers for `I0`, `I1`, `O` in a dictionary
+
+### 9.3 - `snn.utils.gates.OR`: Method
+- Implements an OR-gate in the supplied network
+- __DT__ 1
+- __TRUTHTABLE__
+| I0 | I1 | O  |
+| -- | -- | -- |
+| 0  | 0  | 0  |
+| 0  | 1  | 1  |
+| 1  | 0  | 1  |
+| 1  | 1  | 1  |
+- __INPUTS__
+  - `net`:
+    - Network object
+- __OUTPUTS__
+  - `OR`:
+    - Network identifiers for `I0`, `I1`, `O` in a dictionary
+
+### 9.4 - `snn.utils.gates.NOR`: Method
+- Implements a NOR-gate in the supplied network
+- __NOTE__ that this requires `A` to be activated by a spike in the same time step as `I0` / `I1`
+- __DT__ 1
+- __TRUTHTABLE__
+| I0 | I1 | O  |
+| -- | -- | -- |
+| 0  | 0  | 1  |
+| 0  | 1  | 0  |
+| 1  | 0  | 0  |
+| 1  | 1  | 0  |
+- __INPUTS__
+  - `net`:
+    - Network object
+- __OUTPUTS__
+  - `NOR`:
+    - Network identifiers for `A` (activate), `I0`, `I1`, `O`, `D` (done) in a dictionary
+
+### 9.5 - `snn.utils.gate.NAND`: Method
+- Implements a NAND-gate in the supplied network
+- __NOTE__ that this requires `A` to be activated by a spike in the same time step as `I0` / `I1`
+- __DT__ 1
+- __TRUTHTABLE__
+| I0 | I1 | O  |
+| -- | -- | -- |
+| 0  | 0  | 1  |
+| 0  | 1  | 1  |
+| 1  | 0  | 1  |
+| 1  | 1  | 0  |
+- __INPUTS__
+  - `net`:
+    - Network object
+- __OUTPUTS__
+  - `NAND`:
+    - Network identifiers for `A` (activate), `I0`, `I1`, `O`, `D` (done) in a dictionary
+
+### 9.6 - `snn.utils.gate.XOR`: Method
+- Implements an XOR-gate in the supplied network.
+- __NOTE__ that this requires `A` to be activated by a spike in the same time step as `I0` / `I1`
+- __DT__ 4
+- __TRUTHTABLE__
+| I0 | I1 | O  |
+| -- | -- | -- |
+| 0  | 0  | 0  |
+| 0  | 1  | 1  |
+| 1  | 0  | 1  |
+| 1  | 1  | 0  |
+- __INPUTS__
+  - `net`:
+    - Network object
+- __OUTPUTS__
+  - `XOR`:
+    - Network identifiers for `A` (activate), `I0`, `I1`, `O`, `D` (done) in a dictionary
+
+### 9.7 - `snn.utils.gate.XNOR`: Method
+- Implements an XNOR-gate in the supplied network.
+- __NOTE__ that this requires `A` to be activated by a spike in the same time step as `I0` / `I1`
+- __DT__ 4
+- __TRUTHTABLE__
+| I0 | I1 | O  |
+| -- | -- | -- |
+| 0  | 0  | 1  |
+| 0  | 1  | 0  |
+| 1  | 0  | 0  |
+| 1  | 1  | 1  |
+- __INPUTS__
+  - `net`:
+    - Network object
+- __OUTPUTS__
+  - `XNOR`:
+    - Network identifiers for `A` (activate), `I0`, `I1`, `O`, `D` (done) in a dictionary
+
+### 9.8 - `snn.utils.gate.MUX`: Method
+- Implements a MUX-gate in the supplied network
+- __NOTE__ that this requires `A` to be activated by a spike in the same time step as `I0` / `I1`
+- __DT__ 4
+- __TRUTHTABLE__
+| S0 | I0 | I1 | O  |
+| -- | -- | -- | -- |
+| 0  | 0  | 0  | 0  |
+| 0  | 1  | 0  | 1  |
+| 0  | 0  | 1  | 0  |
+| 0  | 1  | 1  | 1  |
+| 1  | 0  | 0  | 0  |
+| 1  | 1  | 0  | 0  |
+| 1  | 0  | 1  | 1  |
+| 1  | 1  | 1  | 1  |
+- __INPUTS__
+  - `net`:
+    - Network object
+- __OUTPUTS__
+  - `MUX`:
+    - Network identifiers for `A` (activate), `I0`, `I1`, `S`, `O`, `D` (done) in a dictionary
