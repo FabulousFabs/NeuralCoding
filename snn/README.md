@@ -3,6 +3,25 @@
 # Custom spiking neural network package
 This is a custom package for different kinds of spiking neural network simulations, written explicitly for minimal dependencies (with the package requiring only standard libraries, `numpy` and `matplotlib`). Find references below.
 
+# Contents
+## Preamble
+- [Basic Usage](#basic-usage)
+- [Learning](#learning)
+- [Neuromorphic logic gates](#neuromorphic-logic-gates)
+- [Neural Coding](#neural-coding)
+## Documentation
+1. [snn.Network](#1---snnnetwork-class)
+2. [snn.Simulator](#2---snnsimulator-class)
+3. [snn.plots](#3---snnplots-utility-methods)
+4. [snn.solvers](#4---snnsolvers-utility-methods)
+5. [snn.monitors](#5---snnmonitors-collection-of-classes)
+6. [snn.generators](#6---snngenerators-utility-methods)
+7. [snn.utils.ratefunctions](#7---snnutilsratefunctions-utility-methods)
+8. [snn.utils.neuralcoding](#8---snnutilsneuralcoding-utility-methods)
+9. [snn.utils.gates](#9---snnutilsgates-utility-methods)
+10. [snn.neurons](#10---snnneurons-class-collection)
+11. [snn.synapses](#11---snnsynapses-class-collection)
+
 ## Basic Usage
 The package was written to be relatively easy to use. The general structure will always follow:
 ```python
@@ -877,7 +896,7 @@ whereby weights are now going to decay exponentially within an epoch (but, again
 - Computes `dwdt`as per:
   - <img src="https://render.githubusercontent.com/render/math?math=\frac{dw}{dt}%20=%20\frac{1}{\tau_k}%20\times%20(a%20\times%20(V%20-%20E_l)%20-%20w_k%20%2b%20b_k%20\times%20\tau_k%20\times%20s)">
 - Computes `I(t)` as per:
-  - <img src="https://render.githubusercontent.com/render/math?math=I(T)%20=%20A">
+  - <img src="https://render.githubusercontent.com/render/math?math=I(t)%20=%20A">
 
-## 11 - `snn.synapses.`
+## 11 - `snn.synapses`: Class collection
 tbd
