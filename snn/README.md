@@ -1,4 +1,4 @@
-@author: Fabian Schneider <fabian.schneider@donders.ru.nl>, GitHub: FabulousFabs
+@author: Fabian Schneider <fabian.schneider@donders.ru.nl>, GitHub: @FabulousFabs
 
 # Custom spiking neural network package
 This is a custom package for different kinds of spiking neural network simulations, written explicitly for minimal dependencies (with the package requiring only standard libraries, `numpy` and `matplotlib`). Find references below.
@@ -29,7 +29,7 @@ inputs = snn.utils.neuralcoding.rate(inputs = inputs, L = 1e3, lam = 1.0)
 setup a simulation and monitors for spikes
 '''
 sim = snn.Simulator(network = net)
-spikes = sim.monitors(monitor_type = snn.monitors.Spikes)
+spikes = sim.monitor(monitor_type = snn.monitors.Spikes)
 
 '''
 run simulation
@@ -47,7 +47,7 @@ This will create a network consisting of two populations (A and B, with one neur
 Note that, by default, networks will use `snn.neurons.LIF_NMC` as the neuron type and, correspondingly, simulator will use `dt = 1`, `solver = snn.solvers.Clean`. If you want to use a 'real' LIF neuron (or other type), you can specify the type when creating the neural structure. For example,
 ```python
   ...
-  population_A = net.structure(n = 1, type = snn.neurons.LIF)
+  population_A = net.structure(n = 1, t = snn.neurons.LIF)
   ...
 ```
 will do the job. If you do this, please note that this may change the requirements on the simulator, in turn. Particularly, this will require you to specify a solver and time step size for the simulator, like so:
@@ -132,7 +132,7 @@ inputs[1,0] = 1
 setup simulation
 '''
 sim = snn.Simulator(network = net)
-spikes = sim.monitors(monitor_type = snn.monitors.Spikes)
+spikes = sim.monitor(monitor_type = snn.monitors.Spikes)
 
 '''
 run simulation
@@ -184,4 +184,215 @@ whereby weights are now going to decay exponentially within an epoch (but, again
 
 
 # Documentation
-...
+## 1 - `snn.Network`: Class
+### 1.1 - `snn.Network.__init__`: Method
+- Returns a network object.
+- __INPUTS__
+  - `build_from = None`:
+    - If network should be built from previously saved state, specify file name here.
+
+### 1.2 - `snn.Network.neurons_in`: Method
+- Returns neuron indices of a structure.
+- __INPUTS__
+  - `structure`:
+    - Structure identifier. To obtain neuron indices of multiple structures, pass structure identifiers as `np.ndarray`.
+- __OUTPUTS__
+  - `idx`:
+    - Indices of neurons.
+
+### 1.3 - `snn.Network.synapses_in`: Method
+- Returns synapse indices of a fibre.
+- __INPUTS__
+  - `fibre`:
+    - Fibre identifier. To obtain synapse indices of multiple fibres, pass fibre identifiers as `np.ndarray`.
+- __OUTPUTS__
+  - `idx`:
+    - Indices of synapses.
+
+### 1.4 - `snn.Network.structure`: Method
+- Creates a new structure of neurons.
+- __INPUTS__
+  - `n = 1`:
+    - Number of neurons to create
+  - `t = LIF_NMC`:
+    - Neuron type to use for this structure
+  - `inhib_ff = 0.0`:
+    - Degree of lateral feedforward inhibition within structure.
+  - `inhib_fb = 0.0`:
+    - Degree of lateral feedback inhibitin within structure.
+  - `**kwargs`:
+    - Additional named arguments to pass to the constructor of the neuron type that will set custom parameters.
+- __OUTPUTS__
+  - `struct`:
+    - Structure identifier
+
+### 1.5 - `snn.Network.fibre`: Method
+- Creates a new fibre between structures.
+- __INPUTS__
+  - `pre`:
+    - Presynaptic structure identifier
+  - `post`:
+    - Postsynaptic structure identifier
+  - `type`:
+    - Fibre type (see `snn.synapses.*`)
+  - `plasticity = None`:
+    - Plasticity rule to apply to fibre (see `snn.plasticity.*`)
+  - `filter = None`:
+    - Filter to apply to fibre (see `snn.synapses.filters.*`)
+- __OUTPUTS__
+  - `fibre`:
+    - Fibre identifier
+
+### 1.6 - `snn.Network.reset`: Method
+- Resets all non-constant properties of a neuron (before running a new simulation).
+
+### 1.7 - `snn.Network.save`: Method
+- Save the network to disc.
+- __INPUTS__
+  - `to`:
+    - File to save network to
+
+### 1.8 - `snn.Network.load`: Method
+- Load the network from disc.
+- __NOTE__ This function should not technically be used. Please use the `build_from` option in `snn.Network.__init__` instead.
+- __INPUTS__
+  - `model`:
+    - File to load the model from.
+
+## 2 - `snn.Simulator`: Class
+### 2.1 - `snn.Simulator.__init__`:
+- Returns a simulator object.
+- __INPUTS__
+  - `network`:
+    - Network object to simulate
+  - `dt = 1`:
+    - Size of time steps
+  - `solver = snn.solvers.Clean`:
+    - Solver to use for diffential equations
+  - `verbose = False`:
+    - Logging state
+  - `plasticity = True`:
+    - Allow plasticity in this simulator?
+
+### 2.2 - `snn.Simulator.monitor`: Method
+- Add a monitor to the simulator.
+- __INPUTS__
+  - `monitor_type`:
+    - Type of monitor (see `snn.monitors.*`)
+  - `is_synapse = False`:
+    - Are we targetting synapses?
+  - `targets = None`:
+    - Structure or fibre targets of this monitor
+    - If `None`, all will be included
+  - `of = None`:
+    - If `monitor_type = snn.monitors.Continuous`, what measurement should be taken (see `snn.neurons.labels.*`)
+
+### 2.3 - `snn.Simulator.run`: Method
+- Run a simulation
+- __INPUTS__
+  - `T = 1`:
+    - Duration of the simulation
+  - `inputs = None`:
+    - Inputs to use for the simultion
+    - Must be `array` of `dictionary`s, for example `[{'inject': signal1, 'into': structure1}, ...]`
+  - `reset = True`:
+    - Before running the simulation, should neurons be reset to ground state?
+
+## 3 - `snn.plots`: Utility methods
+### 3.1 - `snn.plots.raster`: Method
+- Create a raster plot of spiking activity
+- __INPUTS__
+  - `monitor`:
+    - Monitor identifier
+  - `simulator`:
+    - Simulator object
+  - `title = None`:
+    - Title of plot
+
+### 3.2 - `snn.plots.spike_train`: Method
+- Create a spike train plot of activity
+- __INPUTS__
+  - `monitor`:
+    - Monitor identifier
+  - `simulator`:
+    - Simulator object
+  - `title = None`:
+    - Title of plot
+
+### 3.3 - `snn.plots.continuous`: Method
+- Create a spaced plot of continuous measurements across units
+- __INPUTS__
+  - `monitor`:
+    - Monitor identifier
+  - `simulator`:
+    - Simulator object
+  - `title = None`:
+    - Title of plot
+
+### 3.4 - `snn.plots.rate_in_time`: Method
+- Creates a grid plot of firing rates of neurons across time
+- __INPUTS__
+  - `monitor`:
+    - Monitor identifier
+  - `simulator`:
+    - Simulator object
+  - `title = None`:
+    - Title of plot
+  - `grid = False`:
+    - Show grid lines?
+  - `rf = snn.utils.ratefunctions.linear_filter_and_kernel`:
+    - Rate function to use for creating the time-frequency representation (see `snn.utils.ratefunctions.*`)
+  - `L = 1`:
+    - Window length for kernel function of RF
+
+### 3.5 - `snn.plots.network`: Method
+- Creates a neat plot of the network structure (using a mini force-directed physics simulation for the layout of each structure)
+- This function can also be used to show activity of the network across a simulated episode if the simulator and corresponding monitor are passed
+- __NOTE__ that, if activity animation is desired, this is very slow and, hence, not available as a live view, but saved to disc instead (set `cmap_anim_save_to`)
+- __INPUTS__
+  - `net`:
+    - Network object
+  - `struct_spacing = 0.2`:
+    - Spacing between structures
+  - `fibre_spacing = 0.012`:
+    - Spacing between fibres
+  - `cmap_neurons = 'inferno'`:
+    - Name of the colourmap for neurons
+  - `cmap_neurons_by_struct = True`:
+    - Colour neurons by structure (or randomly)?
+  - `cmap_synapses = 'binary'`:
+    - Name of the colourmap for synapses
+  - `cmap_synapses_by_fibre = True`:
+    - Colour synapses by fibre (or randomly)?
+  - `synapses_alpha = 0.1`:
+    - Alpha level to display synapses at
+  - `labels_struct = None`:
+    - Labels of the structures
+    - If `None`, labels will be auto-generated.
+  - `labels_fibre = None`:
+    - Labels of the fibres
+    - If `None`, labels will be auto-generated.
+  - `show_labels_struct = True`:
+    - Show structure labels?
+  - `show_labels_fibre = False`:
+    - Show fibre labels?
+  - `cmap_neurons_by_state = False`:
+    - Colour neurons by state
+    - __NOTE__ that this enables the animation and requires that you provide `cmap_neurons_sim`, `cmap_neurons_monitor`.
+  - `cmap_neurons_sim = None`:
+    - Simulator object (for animation)
+  - `cmap_neurons_monitor = None`:
+    - Monitor identifier (for animation)
+  - `cmap_neurons_use_kernel = True`:
+    - Use a kernel to smooth out events in monitor?
+  - `cmap_neurons_kernel_L = 10`:
+    - Length of the smoothing kernel.
+  - `cmap_anim_interval = 50`:
+    - Interval between frames of animation
+  - `cmap_anim_save_to = 'network_animated.gif'`:
+    - File to export animation to
+
+### 3.6 - `snn.plots.show`: Method
+- Show plots (short-hand to avoid imports in main)
+
+ 
