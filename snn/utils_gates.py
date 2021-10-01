@@ -2,6 +2,29 @@ import numpy as np
 
 from . import synapses
 
+def CLOCK(net = None, tau = 1, start_ticking = True):
+    '''
+    Implements a CLOCK in the supplied network.
+
+    INPUTS:
+        net             -   Network object
+        tau             -   Time constant (i.e., one beat every tau steps)
+        start_ticking   -   Start clock now? (True/False)
+
+    OUTPUTS:
+        CLOCK   -   Network identifier for CLOCK.
+    '''
+
+    if net is None or int(tau) != tau: return False
+
+    if start_ticking is True:
+        CLOCK = net.structure(V = 1, V_thr = 1, A = 1)
+    else:
+        CLOCK = net.structure(V = 0, V_thr = 1, A = 1)
+    net.fibre(pre = CLOCK, post = CLOCK, type = synapses.One_To_One(efficacy = 1, delay = tau))
+
+    return CLOCK
+
 def AND(net = None):
     '''
     Implements an AND-gate in the supplied network.
@@ -354,3 +377,9 @@ def MUX(net = None):
     net.fibre(pre = I11, post = O, type = synapses.One_To_One(efficacy = 1, delay = 1))
 
     return {'I0': I0, 'I1': I1, 'S': S, 'A': A, 'D': D, 'O': O}
+
+def LATCH(net = None):
+    '''
+    '''
+
+    pass

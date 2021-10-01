@@ -12,7 +12,7 @@ class Simulator:
     Simulator class
     '''
 
-    def __init__(self, dt = 1e-3, network = None, solver = RungeKutta,
+    def __init__(self, dt = 1, network = None, solver = Clean,
                        verbose = False, plasticity = True):
         '''
         Constructor

@@ -137,7 +137,7 @@ class Prototype:
 Neurons = {}
 
 
-class LIF(Prototype):
+class LIF_NMC(Prototype):
     '''
     Standard LIF neuromorphics neuron class
     '''
@@ -197,5 +197,5 @@ class LIF(Prototype):
         '''
 
         return neurons[:,PARAM_UNI.A.value]
-# register LIF
-Neurons[0] = LIF()
+# register LIF_NMC
+Neurons[0] = LIF_NMC()

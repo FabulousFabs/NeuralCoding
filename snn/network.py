@@ -89,7 +89,7 @@ class Network:
         return np.where(self.synapses[:,0] == fibre)[0]
 
 
-    def structure(self, n = 1, t = LIF, inhib_ff = 0.0, inhib_fb = 0.0, **kwargs):
+    def structure(self, n = 1, t = LIF_NMC, inhib_ff = 0.0, inhib_fb = 0.0, **kwargs):
         '''
         Add new structure
 
@@ -152,7 +152,7 @@ class Network:
         else:
             filter = np.zeros((new.shape[0], synapses_filters.FLAG_PARAMS_SIZE))
             filter[:,0] = -1
-        
+
         self.synapses = np.vstack((self.synapses, new)) if self.synapses.shape[0] > 0 else np.array(new)
         self.synapses_filters = np.vstack((self.synapses_filters, filter)) if self.synapses_filters.shape[0] > 0 else np.array(filter)
         self.fibres = np.vstack((self.fibres, np.array([fibre]))) if self.fibres.shape[0] > 0 else np.array([fibre])
