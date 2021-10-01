@@ -849,12 +849,12 @@ whereby weights are now going to decay exponentially within an epoch (but, again
   - `fb = 0.0`:
     - Incoming feedback inhibition
 - Computes presynaptic traces as per:
-  - <img src="https://render.githubusercontent.com/render/math?math=x%27(t)%20=%20\frac{1}{\tau_{pos}}%20\times%20(-x%20%2b%20%20a_p(x)%20\times%20s)">
-  - <img src="https://render.githubusercontent.com/render/math?math=a_p(x)%20=%201%20-%20x">
+  - <img src="https://render.githubusercontent.com/render/math?math=x%27(t)%20=%20\frac{1}{\tau_{%2b}}%20\times%20(-x%20%2b%20%20a_{%2b}(x)%20\times%20s)">
+  - <img src="https://render.githubusercontent.com/render/math?math=a_{%2b}(x)%20=%201%20-%20x">
 - Computes postsynaptic traces as per:
-  - <img src="https://render.githubusercontent.com/render/math?math=y%27(t)%20=%20\frac{1}{\tau_{neg}}%20\times%20(-y%20%2b%20%20a_n(y)%20\times%20s)">
-  - <img src="https://render.githubusercontent.com/render/math?math=a_n(x)%20=%201%20%20\%20\textrm{where}%20x%20>%200">
-  - <img src="https://render.githubusercontent.com/render/math?math=a_n(x)%20=%200%20%20\%20\textrm{where}%20x%20\leq%200">
+  - <img src="https://render.githubusercontent.com/render/math?math=y%27(t)%20=%20\frac{1}{\tau_{-}}%20\times%20(-y%20%2b%20%20a_{-}(y)%20\times%20s)">
+  - <img src="https://render.githubusercontent.com/render/math?math=a_{-}(x)%20=%201%20%20\%20\textrm{where}%20x%20>%200">
+  - <img src="https://render.githubusercontent.com/render/math?math=a_{-}(x)%20=%200%20%20\%20\textrm{where}%20x%20\leq%200">
 - Computes feedforward inhibition updates as per:
   - <img src="https://render.githubusercontent.com/render/math?math=\textrm{ff}%27(t)%20=%20\textrm{inhib}_{ff}%20\times%20(\textrm{xh}%20-%20\textrm{ff}_0)%20\times%20\textrm{xm}">
   - <img src="https://render.githubusercontent.com/render/math?math=\textrm{xh}%20=%20I%20%2b%20\textrm{ff}_{mva}%20\times%20(\textrm{max}(I)%20-%20<I>)">
@@ -872,9 +872,12 @@ whereby weights are now going to decay exponentially within an epoch (but, again
   - `rng = np.random.RandomState()`
     - Random number generator
 - Computes `dVdt` as per:
-  - <img src="https://render.githubusercontent.com/render/math?math=V%27(t)%20=%20V%20\times%20m%20%2b%20(I_e%20-%20I_{ff}%20-%20I_{fb}%20%2b%20N(t))">
+  - <img src="https://render.githubusercontent.com/render/math?math=\frac{dV}{dt}%20=%20V%20\times%20m%20%2b%20(I_e%20-%20I_{ff}%20-%20I_{fb}%20%2b%20N(t))">
   - <img src="https://render.githubusercontent.com/render/math?math=N(t)%20=%20N(\mu,%20\sigma)\%20\textrm{where}\%20N%20>%200\%20\textrm{else}\%20N(T)%20=%200">
 - Computes `dwdt`as per:
-  - <img src="https://render.githubusercontent.com/render/math?math=w%27(t)%20=%20\frac{1}{\tau_k}%20\times%20(a%20\times%20(V%20-%20E_l)%20-%20w_k%20%2b%20b_k%20\times%20\tau_k%20\times%20s)">
+  - <img src="https://render.githubusercontent.com/render/math?math=\frac{dw}{dt}%20=%20\frac{1}{\tau_k}%20\times%20(a%20\times%20(V%20-%20E_l)%20-%20w_k%20%2b%20b_k%20\times%20\tau_k%20\times%20s)">
 - Computes `I(t)` as per:
   - <img src="https://render.githubusercontent.com/render/math?math=I(T)%20=%20A">
+
+## 11 - `snn.synapses.`
+tbd
