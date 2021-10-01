@@ -660,7 +660,7 @@ whereby weights are now going to decay exponentially within an epoch (but, again
 - __DT__ 1
 - __TRUTHTABLE__
 | I0 | I1 | O  |
-| -- | -- | -- |
+| --- | --- | --- |
 | 0  | 0  | 0  |
 | 0  | 1  | 0  |
 | 1  | 0  | 0  |
@@ -677,7 +677,7 @@ whereby weights are now going to decay exponentially within an epoch (but, again
 - __DT__ 1
 - __TRUTHTABLE__
 | I0 | I1 | O  |
-| -- | -- | -- |
+| --- | --- | --- |
 | 0  | 0  | 0  |
 | 0  | 1  | 1  |
 | 1  | 0  | 1  |
@@ -695,7 +695,7 @@ whereby weights are now going to decay exponentially within an epoch (but, again
 - __DT__ 1
 - __TRUTHTABLE__
 | I0 | I1 | O  |
-| -- | -- | -- |
+| --- | --- | --- |
 | 0  | 0  | 1  |
 | 0  | 1  | 0  |
 | 1  | 0  | 0  |
@@ -713,7 +713,7 @@ whereby weights are now going to decay exponentially within an epoch (but, again
 - __DT__ 1
 - __TRUTHTABLE__
 | I0 | I1 | O  |
-| -- | -- | -- |
+| --- | --- | --- |
 | 0  | 0  | 1  |
 | 0  | 1  | 1  |
 | 1  | 0  | 1  |
@@ -731,7 +731,7 @@ whereby weights are now going to decay exponentially within an epoch (but, again
 - __DT__ 4
 - __TRUTHTABLE__
 | I0 | I1 | O  |
-| -- | -- | -- |
+| --- | --- | --- |
 | 0  | 0  | 0  |
 | 0  | 1  | 1  |
 | 1  | 0  | 1  |
@@ -749,7 +749,7 @@ whereby weights are now going to decay exponentially within an epoch (but, again
 - __DT__ 4
 - __TRUTHTABLE__
 | I0 | I1 | O  |
-| -- | -- | -- |
+| --- | --- | --- |
 | 0  | 0  | 1  |
 | 0  | 1  | 0  |
 | 1  | 0  | 0  |
@@ -767,7 +767,7 @@ whereby weights are now going to decay exponentially within an epoch (but, again
 - __DT__ 4
 - __TRUTHTABLE__
 | S0 | I0 | I1 | O  |
-| -- | -- | -- | -- |
+| --- | --- | --- | --- |
 | 0  | 0  | 0  | 0  |
 | 0  | 1  | 0  | 1  |
 | 0  | 0  | 1  | 0  |
