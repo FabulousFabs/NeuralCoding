@@ -21,6 +21,9 @@ This is a custom package for different kinds of spiking neural network simulatio
 9. [snn.utils.gates](#9---snnutilsgates-utility-methods)
 10. [snn.neurons](#10---snnneurons-class-collection)
 11. [snn.synapses](#11---snnsynapses-class-collection)
+12. [snn.synapses.filters](#12---snnsynapsesfilters-class-collection)
+13. [snn.plasticity](#13---snnplasticity-class-collection)
+
 
 ## Basic Usage
 The package was written to be relatively easy to use. The general structure will always follow:
@@ -817,7 +820,7 @@ whereby weights are now going to decay exponentially within an epoch (but, again
     - Network identifiers for `A` (activate), `I0`, `I1`, `S`, `O`, `D` (done) in a dictionary
 
 ## 10 - `snn.neurons`: Class collection
-### 10.1 - `snn.neurons.Prototype`:
+### 10.1 - `snn.neurons.Prototype`: Class
 - This class should not be used
 - It is the prototype for neuron types to be built from
 - __PARAMETERS__
@@ -881,7 +884,7 @@ whereby weights are now going to decay exponentially within an epoch (but, again
 - Computes feedback inhibition updates as per
   - <img src="https://render.githubusercontent.com/render/math?math=\textrm{fb}%27(t)%20=%20\textrm{inhib}_{fb}%20\times%20(\frac{1}{\tau}%20\times%20(%3Cy%3E%20-%20\textrm{fb}))">
 
-### 10.2 - `snn.neurons.LIF_NMC`: Method
+### 10.2 - `snn.neurons.LIF_NMC`: Class
 - Standard LIF neuromorphics class
 - __PARAMETERS__
   - `m = 1`:
@@ -899,4 +902,110 @@ whereby weights are now going to decay exponentially within an epoch (but, again
   - <img src="https://render.githubusercontent.com/render/math?math=I(t)%20=%20A">
 
 ## 11 - `snn.synapses`: Class collection
-tbd
+### 11.1 - `snn.synapses.Full`: Class
+- Full connectivity between two structures
+- __PARAMETERS__
+  - `efficacy = 1`:
+    - Weight of the synapse
+  - `delay = 1`:
+    - Delay of the synapse
+  - `generator = None`:
+    - Generator for synaptic weight initialisation (see `snn.generators.*`)
+
+### 11.2 - `snn.synapses.kWTA`: Class
+- An everybody-but-me implementation of an otherwise full connection
+- __NOTE__ that this requires equal sizes between structures
+- __PARAMETERS__
+  - `efficacy = 1`:
+    - Weight of the synapse
+  - `delay = 1`:
+    - Delay of the synapse
+  - `generator = None`:
+    - Generator for synaptic weight initialisation (see `snn.generators.*`)
+
+### 11.3 - `snn.synapses.One_To_One`: Class
+- One to one connections between structures
+- __NOTE__ that this requires equal sizes between structures
+- __PARAMETERS__
+  - `efficacy = 1`:
+    - Weight of the synapse
+  - `delay = 1`:
+    - Delay of the synapse
+  - `generator = None`:
+    - Generator for synaptic weight initialisation (see `snn.generators.*`)
+
+### 11.4 - `snn.synapses.Percent_To_One`: Class
+- Probabilistic connections of some percentage of presynaptic to one postsynaptic neuron
+- __PARAMETERS__
+  - `p = .25`:
+    - Share of presynaptic neurons per postsynaptic neuron
+  - `efficacy = 1`:
+    - Weight of the synapse
+  - `delay = 1`:
+    - Delay of the synapse
+  - `generator = None`:
+    - Generator for synaptic weight initialisation (see `snn.generators.*`)
+
+## 12 - `snn.synapses.filters`: Class collection
+### 12.1 - `snn.synapses.filters.ExponentialDecay`: Class
+- Exponential weight decay within simulation (required for TTFS encoding)
+- Computes current weight as per
+  - <img src="https://render.githubusercontent.com/render/math?math=w(t%20%2b%201)%20=%20w(t)%20\times%20e^{-\frac{t}{\tau_k}}">
+- __NOTE__ that this is reset within each time step such that learning remains unaffected
+- __PARAMETERS__
+  - `tau_k = 10.0`:
+    - Time constant for exponential decay
+
+### 12.2 - `snn.synapses.filters.RelativeStrength`: Class
+- LEABRA-style relative strengthening of weights to allow for some fibres to be principally stronger or weaker than global fibre strength
+- __NOTE__ that this is reset within each time step such that learning remains unaffected
+- __PARAMETERS__
+  - `multiplier = 1.0`:
+    - Relative strength of this fibre compared to global mean
+
+### 12.3 - `snn.synapses.filters.Phase`: Class
+- Phasic weight filtering (required for phase encoding)
+- Computes current weight as per
+  - <img src="https://render.githubusercontent.com/render/math?math=w(t%20%2b%201)%20=%20w(t)%20\times%202^{-[1%20%2b%20\textrm{mod}(t,%20p)]}">
+- __NOTE__ that this is reset within each time step such that learning remains unaffected
+- __PARAMETERS__
+  - `phases = 8`:
+    - Number of phases
+
+## 13 - `snn.plasticity`: Class collection
+### 13.1 - `snn.plasticity.STDP`: Class
+- Spike-time-dependent plasticity rule
+- Computes weight updates as per
+  - <img src="https://render.githubusercontent.com/render/math?math=\frac{dw}{dt}%20=%20\gamma%20\times%20(A_{%2b}(w)%20\times%20x(t)%20\times%20s_x%20-%20A_{-}(w)%20\times%20y(t)%20\times%20s_y)">
+  - <img src="https://render.githubusercontent.com/render/math?math=A_{%2b}%20=%20\eta_{%2b}(x%20-%20y)%20\%20\textrm{where}\%20(x%20-%20y)%20>%200\%20\textrm{else}\%20A_{%2b}%20=%200">
+  - <img src="https://render.githubusercontent.com/render/math?math=A_{-}%20=%20\eta_{-}(x%20-%20y)%20\%20\textrm{where}\%20(x%20-%20y)%20<%200\%20\textrm{else}\%20A_{-}%20=%200">
+- __PARAMETERS__
+  - `lr = 1e-6`:
+    - Learning rate gamma
+  - `n_p = 1.0`:
+    - Positive weight scaling
+  - `n_n = 1.0`:
+    - Negative weight scaling
+
+### 13.2 - `snn.plasticity.Oja`: Class
+- Oja rule
+- Computes weight updates as per
+  - <img src="https://render.githubusercontent.com/render/math?math=\frac{dw}{dt}%20=%20\gamma%20\times%20(x%20\times%20y%20-%20\beta%20\times%20y^2%20\times%20w)">
+- __PARAMETERS__
+  - `lr = 1e-6`:
+    - Learning rate gamma
+  - `beta = 1e-6`:
+    - Forgetting rate beta
+
+### 13.3 - `snn.plasticity.BCM`: Class
+- Bienenstock-Cooper-Munro rule
+- Computes weight updates as per
+  - <img src="https://render.githubusercontent.com/render/math?math=\frac{dw}{dt}%20=%20\gamma%20\times%20(y%20\times%20(y%20-%20\theta(y))%20\times%20x%20-%20\epsilon%20\times%20w)">
+  - <img src="https://render.githubusercontent.com/render/math?math=\theta(y)%20=%20E[\frac{y}{y_0}]">
+- __PARAMETERS__
+  - `lr = 1e-6`:
+    - Learning rate gamma
+  - `epsilon = 1e-3`:
+    - Forgetting rate epsilon
+  - `y_0`:
+    - Theta scaling factor
