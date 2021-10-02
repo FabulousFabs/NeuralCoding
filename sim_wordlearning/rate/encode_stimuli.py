@@ -5,8 +5,8 @@ import snn
 import matplotlib.pyplot as plt
 
 # setup paths
-pwd = '/users/fabianschneider/desktop/university/master/bic/project/sim_wordlearning/rate/'
-swd = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing-finalise/pcm/'
+pwd = '/project/3018012.23/sim_test/sim_wordlearning/rate/'
+swd = '/project/3018012.23/stimuli/audio/'
 sod = os.path.join(pwd, 'stimuli')
 
 # setup opts
