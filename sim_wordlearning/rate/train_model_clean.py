@@ -4,7 +4,7 @@ sys.path.append('./../..')
 import snn
 
 # setup paths
-pwd = '/users/fabianschneider/desktop/university/master/bic/project/sim_wordlearning/rate/'
+pwd = '/project/3018012.23/sim_test/sim_wordlearning/rate/'
 sod = os.path.join(pwd, 'stimuli')
 mod = os.path.join(pwd, 'models')
 bod = os.path.join(pwd, 'behaviour')
