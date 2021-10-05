@@ -1,4 +1,5 @@
 import numpy as np
+import time
 
 from .solvers import *
 from .monitors import *
@@ -93,14 +94,14 @@ class Simulator:
 
         # setup prototypes and transmission
         proto = Neurons.Prototype()
-        self.network.transmission = np.zeros((self.network.neurons.shape[0], np.ceil(T / self.dt).astype(np.int)))
+        self.network.transmission = np.zeros((self.network.neurons.shape[0], np.ceil(T / self.dt).astype(np.int32)))
 
 
         # setup 'clamping' for input pattern
         if inputs is not None:
             for input in inputs:
                 neurons = self.network.neurons_in(input['into'])
-                ins = np.array(input['inject'], dtype=np.int)
+                ins = np.array(input['inject'], dtype=np.int32)
 
                 assert(ins.shape[1] <= self.network.transmission.shape[1])
                 assert(ins.shape[0] == neurons.shape[0])
@@ -206,52 +207,48 @@ class Simulator:
 
             # propagate spikes
             for n_t in Neurons.Neurons:
+                # get neurons of this type
                 n_i_t = np.where(np.round(self.network.neurons[:,PARAM_UNI.type.value]) == Neurons.Neurons[n_t].type)[0]
 
                 # check for neurons of this type
                 if n_i_t.shape[0] < 1:
                     continue
 
+                # get spiking neurons of this type
                 s = n_i_t[np.isin(n_i_t, spike_indx)]
 
-                for pre in s:
-                    if self.network.synapses.shape[0] < 1:
-                        break
+                # check for spikes
+                if s.shape[0] < 1:
+                    continue
 
-                    conns = np.where(self.network.synapses[:,1] == pre)[0].astype(np.int)
 
-                    # check it has outputs
-                    if conns.shape[0] < 1:
-                        continue
+                # get active synapses
+                a_s = np.isin(self.network.synapses[:,1], s)
 
-                    # check outputs are within T
-                    if np.any(self.network.synapses[conns,4].astype(np.int)+int(t/self.dt) > self.network.transmission.shape[1]-1):
-                        continue
+                # control activity
+                if self.network.synapses[a_s,:].shape[0] < 1:
+                    continue
 
-                    # get post and transmit
-                    post = self.network.synapses[conns,2].astype(np.int)
-                    outs = self.network.neurons[pre,:].reshape((1, Neurons.FLAG_PARAMS_SIZE))
-                    outs = np.tile(outs, (conns.shape[0], 1))
-                    self.network.transmission[post,self.network.synapses[conns,4].astype(np.int)+int(t/self.dt)] += self.network.synapses[conns,3] * (np.ones((conns.shape[0],)) * Neurons.Neurons[n_t].It(outs))
+                # get outputs within T
+                v_s = np.where(self.network.synapses[a_s,4].astype(np.int32) + int(t / self.dt) <= self.network.transmission.shape[1]-1)[0]
+
+                # control outputs within T
+                if v_s.shape[0] < 1:
+                    continue
+
+                # combine masks
+                a_s[np.where(a_s == True)[0][v_s]] = True
+                a_s = np.where(a_s == True)[0].astype(np.int32)
+
+                # get pre, post and transmit
+                pre = self.network.neurons[self.network.synapses[a_s,1].astype(np.int32),:]
+                post = self.network.synapses[a_s,2].astype(np.int32)
+                self.network.transmission[post, self.network.synapses[a_s,4].astype(np.int32) + int(t / self.dt)] += self.network.synapses[a_s,3] * (np.ones((pre.shape[0],)) * Neurons.Neurons[n_t].It(pre))
 
 
             # update pre-syn traces (arrival)
-            received_spike = np.zeros((self.network.neurons.shape[0],))
-
-            for pre in spike_indx:
-                # check we have synapses
-                if self.network.synapses.shape[0] < 1:
-                    break
-
-                conns = np.where(self.network.synapses[:,1] == pre)[0].astype(np.int)
-
-                # check it has outputs
-                if conns.shape[0] < 1:
-                    continue
-
-                received_spike[self.network.synapses[conns,2].astype(np.int)] = 1
-
-            received_spike = np.where(np.isclose(received_spike, 1, rtol=1e-3, atol=1e-3) == True)[0]
+            received_spike = np.isin(np.arange(0, self.network.neurons.shape[0], 1), self.network.synapses[np.isin(self.network.synapses[:,1], spike_indx), 2])
+            received_spike = np.where(received_spike == True)[0]
 
             dxpdt = self.solver(self.network.neurons[:,PARAM_UNI.xp.value], t, self.dt, proto.dxdt, neurons = self.network.neurons, spike_indx = received_spike)
             self.network.neurons[:,PARAM_UNI.xp.value] = self.network.neurons[:,PARAM_UNI.xp.value] + (self.dt * dxpdt)
@@ -269,18 +266,18 @@ class Simulator:
             # plasticity rules
             if self.plasticity is True:
                 for fibre in self.network.fibres:
-                    synapses = self.network.synapses_in(fibre).astype(np.int)
+                    synapses = self.network.synapses_in(fibre).astype(np.int32)
 
                     if np.all(np.isnan(self.network.synapses[synapses,5]) == False):
-                        pre = self.network.neurons[self.network.synapses[synapses,1].astype(np.int),:]
+                        pre = self.network.neurons[self.network.synapses[synapses,1].astype(np.int32),:]
                         pre = np.squeeze(pre).reshape((pre.shape[0], self.network.neurons.shape[1]))
-                        post = self.network.neurons[self.network.synapses[synapses,2].astype(np.int),:]
+                        post = self.network.neurons[self.network.synapses[synapses,2].astype(np.int32),:]
                         post = np.squeeze(post).reshape((post.shape[0], self.network.neurons.shape[1]))
                         syn = self.network.synapses[synapses,:]
                         syn = np.squeeze(syn).reshape((synapses.shape[0], self.network.synapses.shape[1]))
 
                         # floating point work-around
-                        rule = np.round(np.mean(syn[:,5])).astype(np.int)
+                        rule = np.round(np.mean(syn[:,5])).astype(np.int32)
 
                         # updates
                         s_x = np.isin(syn[:,1], spike_indx)
@@ -295,5 +292,5 @@ class Simulator:
 
 
             # check for diverging values
-            div = np.where(self.network.neurons[:,PARAM_UNI.V.value] <= (-3 * np.abs(self.network.neurons[:,PARAM_UNI.V_thr.value])))[0].astype(np.int)
+            div = np.where(self.network.neurons[:,PARAM_UNI.V.value] <= (-3 * np.abs(self.network.neurons[:,PARAM_UNI.V_thr.value])))[0].astype(np.int32)
             self.network.neurons[div,PARAM_UNI.V.value] = self.network.neurons[div,1]
